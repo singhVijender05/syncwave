@@ -26,19 +26,7 @@ function ResponsiveAppBar() {
     <AppBar position="static" sx={{ backgroundColor: '#2C3E50' }}> {/* Navy blue-greyish color */}
       <Toolbar>
         <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-          <Box
-            sx={{
-              height: '60px', // Adjust height for logo size
-              width: '60px',  // Adjust width for logo size
-              borderRadius: '50%',
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <img src="/logo.png" alt="Logo" style={{ width: '100%', height: 'auto' }} /> {/* Rounded logo */}
-          </Box>
+         <Typography variant='h5' sx={{color:'white'}}>Dashboard</Typography>
         </Box>
         <Box sx={{ flexGrow: 0 }}>
           <Tooltip title="Setting">

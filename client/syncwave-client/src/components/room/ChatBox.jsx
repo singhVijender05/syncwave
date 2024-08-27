@@ -13,8 +13,8 @@ const ChatBox = () => {
   ];
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <List sx={{ flexGrow: 1, overflow: 'auto', bgcolor: '#333', color: 'white' }}>
+    <Box sx={{ height: '90%',width:"100%",display: 'flex', flexDirection: 'column' , border:"1px solid black"}}>
+      <List sx={{ flexGrow: 1, overflow: 'auto', bgcolor: 'white', color: 'black' }}>
         {messages.map((msg) => (
           <ListItem key={msg.id}>
             <ListItemText primary={msg.text} />
