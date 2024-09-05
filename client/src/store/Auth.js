@@ -31,6 +31,32 @@ const useAuthStore = create((set) => ({
             showToast('An error occurred', 'error');
         }
     },
+    signup: async (credentials, navigate) => {
+        if (!credentials.email || !credentials.password || !credentials.name) {
+            return showToast('Please fill in all fields', 'error');
+        }
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(credentials),
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (response.ok) {
+                showToast('Account created successfully', 'success');
+                navigate('/sign-in');
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
+    },
 }))
 
 export default useAuthStore;
