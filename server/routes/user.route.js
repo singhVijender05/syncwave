@@ -1,7 +1,7 @@
 import { Router } from "express";
-import User  from "../models/user.models.js";
+import User from "../models/user.models.js";
 import { verifyToken } from "../middlewares/verify.js";
-import {uploadOnCloudinary} from "../utils/cloudinary.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const router = Router();
 
 router.post('/signup', async (req, res) => {
@@ -12,7 +12,7 @@ router.post('/signup', async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: 'Email already in use' });
         }
-        const user = new User({ name, email, password});
+        const user = new User({ name, email, password });
         await user.save();
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
@@ -36,21 +36,21 @@ router.post('/login', async (req, res) => {
         const refreshToken = user.generateRefreshToken();
         res.cookie('accessToken', accessToken, { httpOnly: true });
         res.cookie('refreshToken', refreshToken, { httpOnly: true });
-        res.json({ message: 'Login successful' });
+        res.json({ message: 'Login successful', user: { name: user.name, email: user.email, profilePicture: user.profilePicture } });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
 
 //logout
-router.get('/logout',verifyToken, (req, res) => {
+router.get('/logout', verifyToken, (req, res) => {
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
     res.json({ message: 'Logout successful' });
 });
 
 //update name of user
-router.put('/update',verifyToken, async (req, res) => {
+router.put('/update', verifyToken, async (req, res) => {
     const { name } = req.body;
     try {
         const user = await User.findOne({ email: req.user.email });
@@ -66,7 +66,7 @@ router.put('/update',verifyToken, async (req, res) => {
 });
 
 //delete account
-router.delete('/delete',verifyToken, async (req, res) => {
+router.delete('/delete', verifyToken, async (req, res) => {
     try {
         const user = await User.findOne({ email: req.user.email });
         if (!user) {
@@ -80,11 +80,11 @@ router.delete('/delete',verifyToken, async (req, res) => {
 });
 
 //change profile picture
-router.put('/update/profilePicture',verifyToken, async (req, res) => {
+router.put('/update/profilePicture', verifyToken, async (req, res) => {
     const { profilePicture } = req.body;
     //upload on cloudinary
     try {
-        const url=await uploadOnCloudinary(profilePicture);
+        const url = await uploadOnCloudinary(profilePicture);
         const user = await User.findOne({ email: req.user.email });
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -97,8 +97,10 @@ router.put('/update/profilePicture',verifyToken, async (req, res) => {
     }
 });
 
+//verify token and return user
+router.get('/user-details', verifyToken, async (req, res) => {
+    res.json({ user: req.user })
+})
 
 
-
-    
-export {router};
+export { router };

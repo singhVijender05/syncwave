@@ -20,6 +20,7 @@ const useAuthStore = create((set) => ({
             });
             const data = await response.json();
             if (response.ok) {
+                set({ user: data.user });
                 showToast('Logged in successfully', 'success');
                 navigate('/dashboard');
             } else {
@@ -57,6 +58,25 @@ const useAuthStore = create((set) => ({
             showToast('An error occurred', 'error');
         }
     },
+    getUserDetails: async () => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/user-details`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (response.ok) {
+                set({ user: data.user });
+            } else {
+                console.error(data);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
 }))
 
 export default useAuthStore;
