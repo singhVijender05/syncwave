@@ -4,6 +4,7 @@ import useSocketStore from "./Socket";
 
 const useRoomStore = create((set, get) => ({
     room: null,
+    members: [],
     setRoom: (room) => set({ room }),
     createRoom: async (roomName, navigate) => {
         try {
@@ -90,6 +91,28 @@ const useRoomStore = create((set, get) => ({
                 useSocketStore.getState().joinRoom(roomId);
                 showToast('Room joined successfully', 'success');
                 get().getRoomDetails(roomId);
+                get().getMembers(roomId);
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
+    },
+    getMembers: async (roomId) => {
+        try {
+            showToast('Fetching members...', 'loading');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/members/${roomId}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            console.log(data);
+            showToast('', 'dismiss');
+            if (response.ok) {
+                set({ members: data.members });
             } else {
                 console.error(data);
                 showToast(data.message, 'error');

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { io } from 'socket.io-client';
+import useRoomStore from './Room';
 
 const useSocketStore = create((set) => ({
     socket: null,
@@ -34,6 +35,7 @@ const useSocketStore = create((set) => ({
             set((state) => ({
                 members: [...state.members, data.memberName],
             }));
+            useRoomStore.getState().getMembers(useRoomStore.getState().room._id);
         });
 
         // Listening for chat messages in the room

@@ -4,6 +4,7 @@ import useSocketStore from "../../store/Socket";
 import { useEffect } from "react";
 import useRoomStore from "../../store/Room";
 import { useParams } from "react-router-dom";
+import Members from "./Members";
 
 const RoomPage = () => {
     const { socket, createSocket, videoUrl } = useSocketStore();
@@ -26,13 +27,8 @@ const RoomPage = () => {
             {room && <div className="player w-full md:w-[65%] mb-5 md:mb-0 p-3 md:p-5 space-y-4">
                 <h1 className="text-5xl"><strong>{room.name}</strong></h1>
                 <MediaPlayer url={videoUrl} roomId={roomId} sendVideoUrl={sendVideoUrl} />
-                <div className="members">
-                    <h1 className="text-2xl">Members</h1>
-                    <ul className="flex space-x-4">
-                        <li>Member 1</li>
-                        <li>Member 2</li>
-                        <li>Member 3</li>
-                    </ul>
+                <div className="members-wrapper">
+                    <Members />
                 </div>
             </div>}
 

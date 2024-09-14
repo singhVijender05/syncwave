@@ -53,6 +53,7 @@ export default function roomRoute(io) {
                 return res.status(404).json({ error: 'Room not found' });
             }
             if (room.members.includes(req.user._id)) { // Check user ID in members
+                io.to(id).emit('new-member', { memberName: req.user._id });
                 return res.status(200).json({ message: 'You are already a member of this room' });
             }
             room.members.push(req.user._id);
@@ -61,6 +62,7 @@ export default function roomRoute(io) {
             const user = await User.findById(req.user._id);
             user.rooms.push(room._id);
             await user.save();
+            io.to(id).emit('new-member', { memberName: req.user._id });
             res.status(200).json({ message: 'You have joined the room' });
         } catch (error) {
             res.status(400).json({ error: error.message });
@@ -227,6 +229,34 @@ export default function roomRoute(io) {
             res.status(200).json({ room });
         } catch (error) {
             res.status(400).json({ error: error.message });
+        }
+    });
+
+    // Get room members' name, _id, profilePicture by room id
+    router.get('/members/:id', verifyToken, async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            // Find the room by its ID
+            const room = await Room.findById(id).populate('members', 'name _id profilePicture'); // Assuming 'members' is an array of user IDs
+
+            // If the room is not found
+            if (!room) {
+                return res.status(404).json({ message: 'Room not found' });
+            }
+
+            // Get the members' details
+            const members = room.members.map(member => ({
+                _id: member._id,
+                name: member.name,
+                profilePicture: member.profilePicture
+            }));
+
+            // Return the members' details
+            res.status(200).json({ members });
+        } catch (error) {
+            console.error('Error fetching room members:', error);
+            res.status(500).json({ message: 'Internal server error' });
         }
     });
 
