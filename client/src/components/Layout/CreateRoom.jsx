@@ -21,6 +21,7 @@ const CreateRoom = () => {
             return;
         }
         createRoom(name, navigate);
+        document.getElementById('name').value = '';
     }
 
     return (

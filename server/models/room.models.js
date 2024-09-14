@@ -35,7 +35,6 @@ const roomSchema = new mongoose.Schema(
         ],
         videoUrl: {
             type: String,
-            default: 'https://youtu.be/_RzjFQmAaPw?si=wKk1Va266Kn9-q7R',
         },
         videoHistory: [
             {
