@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { showToast } from "../utils/toast";
 import useSocketStore from "./Socket";
 
-const useRoomStore = create((set) => ({
+const useRoomStore = create((set, get) => ({
     room: null,
     setRoom: (room) => set({ room }),
     createRoom: async (roomName, navigate) => {
@@ -84,10 +84,12 @@ const useRoomStore = create((set) => ({
                 credentials: 'include'
             });
             const data = await response.json();
+            console.log(data);
             showToast('', 'dismiss');
             if (response.ok) {
                 useSocketStore.getState().joinRoom(roomId);
                 showToast('Room joined successfully', 'success');
+                get().getRoomDetails(roomId);
             } else {
                 console.error(data);
                 showToast(data.message, 'error');

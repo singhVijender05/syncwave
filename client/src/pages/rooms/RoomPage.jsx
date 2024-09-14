@@ -6,19 +6,13 @@ import useRoomStore from "../../store/Room";
 import { useParams } from "react-router-dom";
 
 const RoomPage = () => {
-    const { socket, createSocket, videoUrl, joinRoom } = useSocketStore();
-    const { room, getRoomDetails, sendVideoUrl } = useRoomStore();
+    const { socket, createSocket, videoUrl } = useSocketStore();
+    const { room, sendVideoUrl, joinRoom } = useRoomStore();
     const { roomId } = useParams();
 
     useEffect(() => {
-        getRoomDetails(roomId); // Replace 'room-id' with the actual room ID
+        createSocket();
     }, []);
-
-    useEffect(() => {
-        if (room) {
-            createSocket();
-        }
-    }, [room]);
 
     useEffect(() => {
         if (socket) {
