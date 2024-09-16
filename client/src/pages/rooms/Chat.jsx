@@ -1,8 +1,14 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
+import useSocketStore from '../../store/Socket';
+import useRoomStore from '../../store/Room';
+import PropTypes from 'prop-types'; // Import prop-types
+import useAuthStore from '../../store/Auth';
+import { BsPersonCircle } from 'react-icons/bs';
 
-const Chat = () => {
-    const [messages, setMessages] = useState([]);
-    const [inputValue, setInputValue] = useState('');
+const Chat = ({ roomId }) => {
+    const { messages } = useSocketStore();
+    const { sendMessage } = useRoomStore();
+    const { user } = useAuthStore();
     const messagesEndRef = useRef(null);
 
     // Scroll to the bottom when new messages are added
@@ -11,25 +17,37 @@ const Chat = () => {
     }, [messages]);
 
     const handleSendMessage = () => {
-        if (inputValue.trim() !== '') {
-            setMessages([...messages, { sender: 'You', text: inputValue }]);
-            setInputValue(''); // Clear input field after sending
-        }
+        const messageInput = document.getElementById('message-input');
+        if (messageInput.value.trim() === '') return;
+        sendMessage(roomId, messageInput.value);
+        document.getElementById('message-input').value = '';
     };
 
     return (
         <div className="chat-container flex flex-col h-full relative w-full border border-gray-300 rounded-lg">
-            {/* Messages area */}
             <div className="messages flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 ? (
                     <p className="text-gray-500 text-center">No messages yet</p>
                 ) : (
-                    messages.map((msg, index) => (
-                        <div key={index} className={`message ${msg.sender === 'You' ? 'text-right' : 'text-left'}`}>
-                            <div className="inline-block bg-blue-500 text-white p-2 rounded-md max-w-xs truncate">
-                                <strong>{msg.sender}: </strong>
-                                <span>{msg.text}</span>
+                    messages.map((message, index) => (
+                        <div key={index} className={`chat ${user._id == message.userId ? 'chat-end' : 'chat-start'}`}>
+                            <div className="chat-image avatar">
+                                <div className="w-10 rounded-full">
+                                    {
+                                        message.profilePicture ?
+                                            <img
+                                                alt="profile"
+                                                src={message.profilePicture} /> :
+                                            <BsPersonCircle size={40} />
+                                    }
+                                </div>
                             </div>
+                            <div className="chat-header">
+                                {message.userId == user._id ? 'You' : message.sender}
+                                <time className="text-xs opacity-50">{message.time}</time>
+                            </div>
+                            <div className="chat-bubble">{message.content}</div>
+                            <div className="chat-footer opacity-50">Delivered</div>
                         </div>
                     ))
                 )}
@@ -40,10 +58,9 @@ const Chat = () => {
             {/* Input area */}
             <div className="input-area flex items-center p-2 border-t border-gray-300">
                 <input
+                    id='message-input'
                     type="text"
                     className="border border-gray-300 rounded-lg p-2 w-full"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Type a message..."
                     onKeyPress={(e) => {
                         if (e.key === 'Enter') handleSendMessage();
@@ -60,4 +77,26 @@ const Chat = () => {
     );
 };
 
+Chat.propTypes = {
+    roomId: PropTypes.string.isRequired
+};
+
 export default Chat;
+
+
+
+<div className="chat chat-end">
+    <div className="chat-image avatar">
+        <div className="w-10 rounded-full">
+            <img
+                alt="Tailwind CSS chat bubble component"
+                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+        </div>
+    </div>
+    <div className="chat-header">
+        Anakin
+        <time className="text-xs opacity-50">12:46</time>
+    </div>
+    <div className="chat-bubble">I hate you!</div>
+    <div className="chat-footer opacity-50">Seen at 12:46</div>
+</div>

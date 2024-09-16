@@ -161,7 +161,13 @@ export default function roomRoute(io) {
             await newmessage.save();
             room.messages.push(newmessage); // Use user ID for sender
             await room.save();
-            io.to(id).emit('message', { message, sender: req.user.name }); // Emit message to room
+            io.to(id).emit('message', {
+                content: message,
+                sender: req.user.name,
+                profilePicture: req.user.profilePicture,
+                userId: req.user._id,
+                time: new Date().toLocaleTimeString()
+            }); // Emit message to room
             res.status(200).json({ message: 'Message sent successfully' });
         } catch (error) {
             res.status(400).json({ error: error.message });
@@ -172,26 +178,42 @@ export default function roomRoute(io) {
     router.get('/getmessages/:id', verifyToken, async (req, res) => {
         const { id } = req.params;
         try {
-            const room = await Room.findById(id)
-                .populate({
-                    path: 'messages',
-                    populate: {
-                        path: 'sender',
-                        select: 'name uuid' // Select only the username and uuid fields
-                    }
-                });// Populate sender username
+            // Find the room by ID and populate messages (and also populate sender details in each message)
+            const room = await Room.findById(id).populate({
+                path: 'messages',  // Populate the messages array
+                populate: {
+                    path: 'sender',  // Populate the sender field inside each message
+                    select: 'name profilePicture _id',  // Only select the name field from the User model
+                },
+            });
+
+            // Check if room exists
             if (!room) {
                 return res.status(404).json({ error: 'Room not found' });
             }
-            if (!room.members.includes(req.user._id)) { // Check user ID in members
+
+            // Ensure the user is a member of the room
+            if (!room.members.includes(req.user._id)) {
                 return res.status(400).json({ error: 'You are not a member of this room' });
             }
 
-            res.status(200).json({ messages: room.messages });
+            // Map over the messages to format the response
+            const messages = room.messages.map(message => ({
+                content: message.content,
+                sender: message.sender.name,  // Access sender's name
+                profilePicture: message.sender.profilePicture,  // Access sender's profile picture
+                userId: message.sender._id,  // Access sender's ID
+                time: message.createdAt.toLocaleTimeString(),
+            }));
+
+            // Send the messages as a response
+            res.status(200).json({ messages });
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            console.error('Error fetching messages:', error);
+            res.status(500).json({ error: error.message });
         }
     });
+
 
     // Set video URL for a room
     router.post('/video/:id', verifyToken, async (req, res) => {

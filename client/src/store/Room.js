@@ -92,6 +92,7 @@ const useRoomStore = create((set, get) => ({
                 showToast('Room joined successfully', 'success');
                 get().getRoomDetails(roomId);
                 get().getMembers(roomId);
+                get().getAllMessages(roomId);
             } else {
                 console.error(data);
                 showToast(data.message, 'error');
@@ -113,6 +114,51 @@ const useRoomStore = create((set, get) => ({
             showToast('', 'dismiss');
             if (response.ok) {
                 set({ members: data.members });
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
+    },
+    sendMessage: async (roomId, message) => {
+        try {
+            showToast('Sending message...', 'loading');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/sendmessage/${roomId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message }),
+                credentials: 'include'
+            });
+            const data = await response.json();
+            showToast('', 'dismiss');
+            if (response.ok) {
+                showToast('Message sent', 'success');
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
+    },
+    getAllMessages: async (roomId) => {
+        try {
+            showToast('Fetching messages...', 'loading');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/getmessages/${roomId}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            console.log(data);
+            showToast('', 'dismiss');
+            if (response.ok) {
+                useSocketStore.getState().setMessages(data.messages);
             } else {
                 console.error(data);
                 showToast(data.message, 'error');

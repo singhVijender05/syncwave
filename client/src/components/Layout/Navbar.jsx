@@ -9,7 +9,7 @@ const Navbar = () => {
     const { user } = useAuthStore();
     return (
         <>
-            <nav className="p-2 fixed top-0 w-full z-50 flex items-center justify-between font-poppins shadow-2xl border-b">
+            <nav className="p-2 backdrop-blur-2xl fixed top-0 w-full z-50 flex items-center justify-between font-poppins shadow-2xl border-b">
                 <div className="left w-1/2 md:w-1/4">
                     <h1 className="px-4">
                         <Link to="/">

@@ -42,7 +42,7 @@ const RoomPage = () => {
 
                     {/* Chat box should flex to fill available space */}
                     <div className="flex-1 overflow-hidden">
-                        <Chat />
+                        <Chat roomId={roomId} />
                     </div>
                 </div>
             </div>

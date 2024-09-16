@@ -68,6 +68,7 @@ const useAuthStore = create((set) => ({
                 credentials: 'include'
             });
             const data = await response.json();
+            console.log(data);
             if (response.ok) {
                 set({ user: data.user });
             } else {

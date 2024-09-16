@@ -11,6 +11,7 @@ const useSocketStore = create((set) => ({
     // Function to set the socket connection
     setSocket: (socket) => set({ socket }),
     setVideoUrl: (videoUrl) => set({ videoUrl }),
+    setMessages: (messages) => set({ messages }),
 
     // Function to create a new socket connection
     createSocket: () => {
@@ -39,7 +40,7 @@ const useSocketStore = create((set) => ({
         });
 
         // Listening for chat messages in the room
-        socket.on('chat-message', (messageData) => {
+        socket.on('message', (messageData) => {
             set((state) => ({
                 messages: [...state.messages, messageData],
             }));
