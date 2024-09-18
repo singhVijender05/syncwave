@@ -2,8 +2,14 @@ import PropTypes from 'prop-types'; // Import prop-types
 import ReactPlayer from 'react-player';
 import { MdOutlineAddLink } from 'react-icons/md';
 import { showToast } from '../../utils/toast';
+import { useEffect, useRef } from 'react';
+import useSocketStore from '../../store/Socket';
 
 const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
+
+    const playerRef = useRef(null); // To control the player instance
+    const { socket, videoPlaying, videoTimestamp, setVideoTimestamp, setVideoPlaying } = useSocketStore()
+
     const handleShowModal = () => {
         const modal = document.getElementById('my_modal_6');
         modal.showModal();
@@ -19,15 +25,37 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
         sendVideoUrl(roomId, link);
     }
 
+    const handlePlayPause = (newPlayingState) => {
+        setVideoPlaying(newPlayingState);
+        socket.emit('video-state-change', { playing: newPlayingState, timestamp: videoTimestamp, roomId });
+    };
+
+    // Handle seek event
+    const handleSeek = (newTime) => {
+        socket.emit('video-seek', { playing: videoPlaying, timestamp: newTime, roomId });
+    };
+
+    useEffect(() => {
+        if (playerRef.current) {
+            playerRef.current.seekTo(videoTimestamp);
+        }
+    }, [videoTimestamp]);
+
     return (
         <div className="relative" style={{ paddingTop: '56.25%' }}> {/* 16:9 Aspect Ratio */}
             {url ? (
                 <ReactPlayer
+                    ref={playerRef}
                     url={url} // Use the URL passed as a prop
+                    playing={videoPlaying} // Sync play/pause state
                     controls
                     width="100%"
                     height="100%"
                     className="absolute top-0 left-0"
+                    onPlay={() => handlePlayPause(true)}
+                    onPause={() => handlePlayPause(false)}
+                    onSeek={(newTime) => handleSeek(newTime)}
+                    onProgress={(progress) => setVideoTimestamp(progress.playedSeconds)}
                 />
             ) : (
                 <FallbackComponent handleShowModal={handleShowModal} />

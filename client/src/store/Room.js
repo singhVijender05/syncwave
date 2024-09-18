@@ -85,7 +85,6 @@ const useRoomStore = create((set, get) => ({
                 credentials: 'include'
             });
             const data = await response.json();
-            console.log(data);
             showToast('', 'dismiss');
             if (response.ok) {
                 useSocketStore.getState().joinRoom(roomId);
@@ -110,7 +109,6 @@ const useRoomStore = create((set, get) => ({
                 credentials: 'include'
             });
             const data = await response.json();
-            console.log(data);
             showToast('', 'dismiss');
             if (response.ok) {
                 set({ members: data.members });
@@ -155,7 +153,6 @@ const useRoomStore = create((set, get) => ({
                 credentials: 'include'
             });
             const data = await response.json();
-            console.log(data);
             showToast('', 'dismiss');
             if (response.ok) {
                 useSocketStore.getState().setMessages(data.messages);
