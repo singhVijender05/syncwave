@@ -2,13 +2,17 @@ import PropTypes from 'prop-types'; // Import prop-types
 import ReactPlayer from 'react-player';
 import { MdOutlineAddLink } from 'react-icons/md';
 import { showToast } from '../../utils/toast';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useSocketStore from '../../store/Socket';
 
-const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
+const SEEK_THRESHOLD = 3; // Seconds difference to detect a manual seek
 
+const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
+    const [playing, setPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [lastKnownTime, setLastKnownTime] = useState(0); // To track last known time
     const playerRef = useRef(null); // To control the player instance
-    const { socket, videoPlaying, videoTimestamp, setVideoTimestamp, setVideoPlaying } = useSocketStore()
+    const { socket } = useSocketStore();
 
     const handleShowModal = () => {
         const modal = document.getElementById('my_modal_6');
@@ -23,23 +27,51 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
             return;
         }
         sendVideoUrl(roomId, link);
-    }
-
-    const handlePlayPause = (newPlayingState) => {
-        setVideoPlaying(newPlayingState);
-        socket.emit('video-state-change', { playing: newPlayingState, timestamp: videoTimestamp, roomId });
     };
 
-    // Handle seek event
+    const handlePlayPause = (newPlayingState) => {
+        setPlaying(newPlayingState);
+        socket.emit('video-state-change', { playing: newPlayingState, roomId });
+    };
+
     const handleSeek = (newTime) => {
-        socket.emit('video-seek', { playing: videoPlaying, timestamp: newTime, roomId });
+        console.log('Seeking to:', newTime);
+        setCurrentTime(newTime);
+        socket.emit('video-seek', { timestamp: newTime, roomId });
+    };
+
+    const detectSeek = (progress) => {
+        const { playedSeconds } = progress;
+
+        if (Math.abs(playedSeconds - lastKnownTime) > SEEK_THRESHOLD) {
+            console.log('Seek detected to:', playedSeconds);
+            handleSeek(playedSeconds);
+        }
+
+        setLastKnownTime(playedSeconds); // Update the last known time
+        setCurrentTime(playedSeconds); // Update the current time
     };
 
     useEffect(() => {
-        if (playerRef.current) {
-            playerRef.current.seekTo(videoTimestamp);
+        if (socket && roomId) {
+            // Listen to video state updates from other members in the room
+            socket.on('video-state-update', (data) => {
+                console.log('Received video state update:', data);
+                if (data.playing != null && data.playing !== playing) {
+                    setPlaying(data.playing);
+                }
+                if (data.timestamp && data.timestamp !== currentTime) {
+                    playerRef.current.seekTo(data.timestamp); // Seek to the timestamp received
+                }
+            });
         }
-    }, [videoTimestamp]);
+
+        return () => {
+            if (socket) {
+                socket.off('video-state-update'); // Clean up event listener on unmount
+            }
+        };
+    }, [socket, roomId, playing, currentTime]);
 
     return (
         <div className="relative" style={{ paddingTop: '56.25%' }}> {/* 16:9 Aspect Ratio */}
@@ -47,15 +79,15 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
                 <ReactPlayer
                     ref={playerRef}
                     url={url} // Use the URL passed as a prop
-                    playing={videoPlaying} // Sync play/pause state
+                    playing={playing} // Sync play/pause state
+                    muted={true} // Enable audio
                     controls
                     width="100%"
                     height="100%"
                     className="absolute top-0 left-0"
                     onPlay={() => handlePlayPause(true)}
                     onPause={() => handlePlayPause(false)}
-                    onSeek={(newTime) => handleSeek(newTime)}
-                    onProgress={(progress) => setVideoTimestamp(progress.playedSeconds)}
+                    onProgress={(progress) => detectSeek(progress)} // Detect seek events
                 />
             ) : (
                 <FallbackComponent handleShowModal={handleShowModal} />

@@ -22,7 +22,7 @@ const io = new Server(server, {
 
 app.use(cors(
     {
-        origin: "http://localhost:5173",
+        origin: ["http://localhost:5173", "http://192.168.0.105:5173"],
         credentials: true
     }
 ))
@@ -68,18 +68,18 @@ io.on('connection', (socket) => {
     });
     // Listen to video state changes (play/pause)
     socket.on('video-state-change', ({ roomId, playing, timestamp }) => {
-        socket.to(roomId).emit('video-state-update', { playing, timestamp });
+        socket.to(roomId).emit('video-state-update', { playing });
     });
 
     // Listen to video seek
     socket.on('video-seek', ({ roomId, timestamp }) => {
-        socket.to(roomId).emit('video-state-update', { playing: true, timestamp });
+        socket.to(roomId).emit('video-state-update', { timestamp });
     });
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
 });
 
-server.listen(process.env.PORT || 5000, () => {
+server.listen(process.env.PORT || 5000, '0.0.0.0', () => {
     console.log('Server is running on port 5000');
 });
