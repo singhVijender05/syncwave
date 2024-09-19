@@ -1,7 +1,4 @@
-Here's a refined description for your GitHub project:
-
 ---
-
 # SyncWave: Real-Time Video and Music Streaming Platform
 
 SyncWave is a real-time online streaming service that allows users to watch videos or listen to music together, fostering social interaction through integrated chat features. The platform enhances the shared experience by providing a seamless environment for users to engage with their favorite content in sync.
@@ -14,5 +11,3 @@ SyncWave is a real-time online streaming service that allows users to watch vide
 This project leverages technologies such as Socket.IO for real-time messaging, Express for backend, React for the frontend, and MongoDB for efficient data management.
 
 --- 
-
-Feel free to adjust based on specific implementation details or focus!
