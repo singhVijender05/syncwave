@@ -10,7 +10,7 @@ const SEEK_THRESHOLD = 3; // Seconds difference to detect a manual seek
 const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
     const [playing, setPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
-    const [lastKnownTime, setLastKnownTime] = useState(0); // To track last known time
+    const [lastKnownTime, setLastKnownTime] = useState(0);
     const playerRef = useRef(null); // To control the player instance
     const { socket } = useSocketStore();
 
@@ -31,7 +31,7 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
 
     const handlePlayPause = (newPlayingState) => {
         setPlaying(newPlayingState);
-        socket.emit('video-state-change', { playing: newPlayingState, roomId });
+        socket.emit('video-state-change', { playing: newPlayingState, roomId, timestamp: currentTime });
     };
 
     const handleSeek = (newTime) => {
@@ -73,6 +73,26 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
         };
     }, [socket, roomId, playing, currentTime]);
 
+    useEffect(() => {
+        if (socket && roomId) {
+            socket.emit('request-sync', { roomId }); // Request video state sync on load
+
+            // Listen to video state sync response
+            socket.on('sync-video-state', (data) => {
+                console.log('Syncing video state for new member:', data);
+                if (data.playing != null) {
+                    setPlaying(data.playing); // Set the playing state
+                }
+                if (data.timestamp != null) {
+                    console.log('useSeeking to:', data.timestamp);
+                    console.log('playerRef:', playerRef);
+                    setCurrentTime(data.timestamp); // Set the current time
+                    playerRef.current.seekTo(data.timestamp); // Sync to the correct timestamp
+                }
+            });
+        }
+    }, [playerRef]);
+
     return (
         <div className="relative" style={{ paddingTop: '56.25%' }}> {/* 16:9 Aspect Ratio */}
             {url ? (
@@ -88,6 +108,12 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
                     onPlay={() => handlePlayPause(true)}
                     onPause={() => handlePlayPause(false)}
                     onProgress={(progress) => detectSeek(progress)} // Detect seek events
+                    onEnded={() => {
+                        setPlaying(false);
+                        setCurrentTime(0);
+                        setLastKnownTime(0);
+                        handlePlayPause(false);
+                    }}
                 />
             ) : (
                 <FallbackComponent handleShowModal={handleShowModal} />

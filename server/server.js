@@ -51,12 +51,38 @@ app.get('/auth/google/callback', passport.authenticate('google', { session: fals
     res.redirect('http://localhost:5173/oauth/callback?accessToken=' + accessToken + '&refreshToken=' + refreshToken);
 });
 
+const rooms = {};
+
+// Function to calculate the correct current timestamp
+const getCurrentTimestamp = (roomId) => {
+    const room = rooms[roomId];
+    if (!room) return 0;
+
+    const { timestamp, playing, lastUpdateTime } = room;
+    if (playing) {
+        // Calculate the current timestamp based on when the video was last played
+        const currentTime = (Date.now() - lastUpdateTime) / 1000; // Convert ms to seconds
+        return timestamp + currentTime;
+    } else {
+        // If the video is paused, return the stored timestamp
+        return timestamp;
+    }
+};
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    socket.on('join-room', (data) => {
-        console.log('join-room', data);
-        socket.join(data.roomId);
+    socket.on('join-room', ({ roomId }) => {
+        console.log('join-room', roomId);
+        socket.join(roomId);
+    });
+    socket.on('request-sync', ({ roomId }) => {
+        if (rooms[roomId]) {
+            const currentTimestamp = getCurrentTimestamp(roomId);
+            const { playing } = rooms[roomId];
+            socket.emit('sync-video-state', { timestamp: currentTimestamp, playing });
+        } else {
+            rooms[roomId] = { playing: false, timestamp: 0, lastUpdateTime: Date.now() };
+        }
     });
     socket.on('leave-room', (data) => {
         console.log('leave-room', data);
@@ -68,12 +94,31 @@ io.on('connection', (socket) => {
     });
     // Listen to video state changes (play/pause)
     socket.on('video-state-change', ({ roomId, playing, timestamp }) => {
+        if (!rooms[roomId]) rooms[roomId] = {};
+
+        const room = rooms[roomId];
+        room.playing = playing;
+        room.timestamp = timestamp;
+
+        // Store the last update time when the video state changes
+        room.lastUpdateTime = Date.now();
+
+        // Broadcast the play/pause state change to everyone in the room
         socket.to(roomId).emit('video-state-update', { playing });
+        console.log(rooms);
     });
 
     // Listen to video seek
     socket.on('video-seek', ({ roomId, timestamp }) => {
+        if (!rooms[roomId]) rooms[roomId] = {};
+
+        const room = rooms[roomId];
+        room.timestamp = timestamp;
+        room.lastUpdateTime = Date.now(); // Record the time when seek occurred
+
+        // Broadcast the new timestamp to everyone in the room
         socket.to(roomId).emit('video-state-update', { timestamp });
+        console.log(rooms);
     });
     socket.on('disconnect', () => {
         console.log('user disconnected');
