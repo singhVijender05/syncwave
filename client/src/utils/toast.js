@@ -11,6 +11,9 @@ export const showToast = (message, type = 'success') => {
         case 'loading':
             toast.loading(message);
             break;
+        case 'dismiss':
+            toast.dismiss();
+            break;
         default:
             toast(message);
             break;

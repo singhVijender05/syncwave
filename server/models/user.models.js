@@ -20,7 +20,6 @@ const userSchema = new mongoose.Schema(
         },
         profilePicture: {
             type: String, // URL to the avatar image
-            default: 'default_avatar.png', // or a default avatar URL
         },
         emailVerified: {
             type: Boolean,
@@ -46,48 +45,48 @@ const userSchema = new mongoose.Schema(
     });
 
 
-    userSchema.pre('save', async function(next) {
-        if (this.isModified('password') || this.isNew) {
-            try {
-                const salt = await bcrypt.genSalt(10);
-                this.password = await bcrypt.hash(this.password, salt);
-                next();
-            } catch (error) {
-                next(error);
-            }
-        } else {
+userSchema.pre('save', async function (next) {
+    if (this.isModified('password') || this.isNew) {
+        try {
+            const salt = await bcrypt.genSalt(10);
+            this.password = await bcrypt.hash(this.password, salt);
             next();
+        } catch (error) {
+            next(error);
         }
-    });
-    
-    // Method to compare input password with hashed password
-    userSchema.methods.comparePassword = async function(inputPassword) {
-        return await bcrypt.compare(inputPassword, this.password);
-    };
+    } else {
+        next();
+    }
+});
 
-    userSchema.methods.generateAccessToken = function () {
-        console.log(
-            process.env.ACCESS_TOKEN_SECRET,
-            process.env.ACCESS_TOKEN_EXPIRY
-        );
-        return jwt.sign(
-            {
-                _id: this._id,
-                name: this.name,
-                email: this.email,
-            },
-            process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: (process.env.ACCESS_TOKEN_EXPIRY).toString()}
-        );
-    };
-    userSchema.methods.generateRefreshToken = function () {
-        return jwt.sign(
-            {
-                _id: this._id,
-            },
-            process.env.REFRESH_TOKEN_SECRET,
-            { expiresIn: (process.env.REFRESH_TOKEN_EXPIRY).toString() }
-        );
-    };
-const User=mongoose.model('User', userSchema);
+// Method to compare input password with hashed password
+userSchema.methods.comparePassword = async function (inputPassword) {
+    return await bcrypt.compare(inputPassword, this.password);
+};
+
+userSchema.methods.generateAccessToken = function () {
+    console.log(
+        process.env.ACCESS_TOKEN_SECRET,
+        process.env.ACCESS_TOKEN_EXPIRY
+    );
+    return jwt.sign(
+        {
+            _id: this._id,
+            name: this.name,
+            email: this.email,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: (process.env.ACCESS_TOKEN_EXPIRY).toString() }
+    );
+};
+userSchema.methods.generateRefreshToken = function () {
+    return jwt.sign(
+        {
+            _id: this._id,
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: (process.env.REFRESH_TOKEN_EXPIRY).toString() }
+    );
+};
+const User = mongoose.model('User', userSchema);
 export default User;
