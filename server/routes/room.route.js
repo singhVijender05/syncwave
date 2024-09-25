@@ -114,8 +114,16 @@ export default function roomRoute(io) {
     // Get rooms of a user
     router.get('/getRooms', verifyToken, async (req, res) => {
         try {
-            const rooms = await Room.find({ members: req.user._id }); // Filter by user ID
-            res.status(200).json({ rooms });
+            // Created rooms where the user is the creator and also populate members and admin
+            const createdRooms = await Room.find({ creator: req.user._id }).populate('members', 'name _id profilePicture').populate('admins', 'name _id profilePicture');
+
+            // Joined rooms, excluding rooms where the user is the creator
+            const joinedRooms = await Room.find({
+                members: req.user._id,
+                creator: { $ne: req.user._id } // Exclude rooms where the user is the creator
+            });
+
+            res.status(200).json({ createdRooms, joinedRooms });
         } catch (error) {
             res.status(400).json({ error: error.message });
         }

@@ -1,8 +1,13 @@
 import { Router } from "express";
+import multer from 'multer';
 import User from "../models/user.models.js";
 import { verifyToken } from "../middlewares/verify.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const router = Router();
+
+// Configure multer for file upload handling
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage });
 
 router.post('/signup', async (req, res) => {
     console.log(req.body);
@@ -80,11 +85,13 @@ router.delete('/delete', verifyToken, async (req, res) => {
 });
 
 //change profile picture
-router.put('/update/profilePicture', verifyToken, async (req, res) => {
-    const { profilePicture } = req.body;
-    //upload on cloudinary
+router.put('/update/profilePicture', verifyToken, upload.single('profilePicture'), async (req, res) => {
+    const file = req.file; // Multer processes the file
+    if (!file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
     try {
-        const url = await uploadOnCloudinary(profilePicture);
+        const url = await uploadOnCloudinary(file);
         const user = await User.findOne({ email: req.user.email });
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -93,13 +100,26 @@ router.put('/update/profilePicture', verifyToken, async (req, res) => {
         await user.save();
         res.json({ message: 'Profile picture updated successfully' });
     } catch (error) {
+        console.log(error);
         res.status(400).json({ error: error.message });
     }
 });
 
 //verify token and return user
 router.get('/user-details', verifyToken, async (req, res) => {
-    res.json({ user: req.user })
+    try {
+        const user = await User.findOne({ _id: req.user._id });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+        res.json({
+            user: {
+                name: user.name, email: user.email, profilePicture: user.profilePicture, createdAt: user.createdAt, rooms: user.rooms.length
+            }
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 })
 
 
