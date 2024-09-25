@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import useAuthStore from './store/Auth'
 import CreateRoom from './components/Layout/CreateRoom'
 import RoomPage from './pages/rooms/RoomPage'
+import DashboardPage from './pages/dashboard/DashboardPage'
 function App() {
 
   const { getUserDetails } = useAuthStore();
@@ -23,6 +24,7 @@ function App() {
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path='/sign-up' element={<SignUpPage />} />
         <Route path='/rooms/:roomId' element={<RoomPage />} />
+        <Route path='/dashboard' element={<DashboardPage />} />
       </Routes>
       <CreateRoom />
     </div>

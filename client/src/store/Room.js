@@ -4,6 +4,7 @@ import useSocketStore from "./Socket";
 
 const useRoomStore = create((set, get) => ({
     room: null,
+    rooms: [],
     members: [],
     setRoom: (room) => set({ room }),
     createRoom: async (roomName, navigate) => {
@@ -156,6 +157,27 @@ const useRoomStore = create((set, get) => ({
             showToast('', 'dismiss');
             if (response.ok) {
                 useSocketStore.getState().setMessages(data.messages);
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
+    },
+    getAllRooms: async () => {
+        try {
+            showToast('Fetching rooms...', 'loading');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/getRooms`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            console.log(data);
+            showToast('', 'dismiss');
+            if (response.ok) {
+                set({ rooms: data });
             } else {
                 console.error(data);
                 showToast(data.message, 'error');

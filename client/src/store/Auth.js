@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { showToast } from '../utils/toast';
 
-const useAuthStore = create((set) => ({
+const useAuthStore = create((set, get) => ({
     user: null,
     setUser: (user) => set({ user }),
     logout: () => set({ user: null }),
@@ -68,6 +68,7 @@ const useAuthStore = create((set) => ({
                 credentials: 'include'
             });
             const data = await response.json();
+            console.log(data);
             if (response.ok) {
                 set({ user: data.user });
             } else {
@@ -75,6 +76,26 @@ const useAuthStore = create((set) => ({
             }
         } catch (error) {
             console.error(error);
+        }
+    },
+    uploadProfilePicture: async (formData) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/update/profilePicture`, {
+                method: 'PUT',
+                body: formData,
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (response.ok) {
+                showToast('Profile picture uploaded successfully', 'success');
+                get().getUserDetails();
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
         }
     }
 }))
