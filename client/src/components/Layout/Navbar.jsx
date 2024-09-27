@@ -32,7 +32,12 @@ const Navbar = () => {
                     {
                         user ? (
                             <Link to="/dashboard" className="text-gray-600 btn shadow-none hover:bg-transparent bg-transparent border-none ">
-                                <BsPersonCircle size={30} />
+                                {
+                                    user?.profilePicture ?
+                                        <img src={user?.profilePicture} alt="profile" className="rounded-full w-8 h-8 object-cover ring-base ring-offset-base-100 ring-2 ring-offset-2" />
+                                        :
+                                        <BsPersonCircle size={30} />
+                                }
                             </Link>
                         ) : (
                             <Link to="/sign-in" className="btn btn-neutral mx-3">Sign In</Link>

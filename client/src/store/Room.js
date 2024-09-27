@@ -186,6 +186,27 @@ const useRoomStore = create((set, get) => ({
             console.error(error);
             showToast('An error occurred', 'error');
         }
+    },
+    deleteRoomById: async (roomId) => {
+        try {
+            showToast('Deleting room...', 'loading');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/delete/${roomId}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            showToast('', 'dismiss');
+            if (response.ok) {
+                get().getAllRooms();
+                showToast('Room deleted successfully', 'success');
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
     }
 }))
 
