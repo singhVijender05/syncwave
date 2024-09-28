@@ -5,7 +5,7 @@ import useRoomStore from './Room';
 const useSocketStore = create((set, get) => ({
     socket: null,
     videoUrl: null,
-    members: [],
+    connectedMembers: [],
     messages: [],
 
     setSocket: (socket) => set({ socket }),
@@ -29,7 +29,7 @@ const useSocketStore = create((set, get) => ({
 
         socket.on('new-member', (data) => {
             set((state) => ({
-                members: [...state.members, data.memberName],
+                connectedMembers: [...state.connectedMembers, data.memberName],
             }));
             useRoomStore.getState().getMembers(useRoomStore.getState().room._id);
         });

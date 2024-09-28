@@ -41,14 +41,14 @@ const Rooms = () => {
                             )) :
                             <p className="flex items-center justify-center space-x-2">
                                 <FaCircleExclamation className="text-3xl text-red-500" />
-                                <span>
+                                <span className="w-full text-left">
                                     No rooms created
                                 </span>
                             </p>
                     }
                 </div>
                 <h1 className="text-5xl font-bold mb-6">Joined Rooms</h1>
-                <div className="room-cards flex space-x-2">
+                <div className="room-cards flex flex-wrap flex-col md:flex-row">
                     {
                         rooms.joinedRooms &&
                             rooms.joinedRooms.length ? rooms.joinedRooms.map(room => (
@@ -56,7 +56,7 @@ const Rooms = () => {
                             )) :
                             <p className="flex items-center justify-center space-x-2">
                                 <FaCircleExclamation className="text-3xl text-red-500" />
-                                <span>
+                                <span className="w-full text-left">
                                     No rooms joined
                                 </span>
                             </p>

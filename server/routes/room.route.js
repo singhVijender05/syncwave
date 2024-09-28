@@ -118,10 +118,7 @@ export default function roomRoute(io) {
             const createdRooms = await Room.find({ creator: req.user._id }).populate('members', 'name _id profilePicture').populate('admins', 'name _id profilePicture');
 
             // Joined rooms, excluding rooms where the user is the creator
-            const joinedRooms = await Room.find({
-                members: req.user._id,
-                creator: { $ne: req.user._id } // Exclude rooms where the user is the creator
-            });
+            const joinedRooms = await Room.find({ members: req.user._id, creator: { $ne: req.user._id } }).populate('members', 'name _id profilePicture').populate('admins', 'name _id profilePicture');
 
             res.status(200).json({ createdRooms, joinedRooms });
         } catch (error) {

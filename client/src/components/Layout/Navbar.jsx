@@ -1,12 +1,18 @@
 import { MdLiveTv } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { navTabs } from "../../utils/constants";
-import { BsPersonCircle } from "react-icons/bs";
+import { BsPersonCircle, BsPlusCircleFill } from "react-icons/bs";
 import useAuthStore from "../../store/Auth";
 import { FaHamburger } from "react-icons/fa";
 
 const Navbar = () => {
     const { user } = useAuthStore();
+
+    const handleShowModal = () => {
+        const modal = document.getElementById('my_modal_5');
+        modal.showModal();
+    }
+
     return (
         <>
             <nav className="p-2 backdrop-blur-2xl fixed top-0 w-full z-50 flex items-center justify-between font-poppins shadow-2xl border-b">
@@ -29,6 +35,11 @@ const Navbar = () => {
                     </ul>
                 </div>
                 <div className="right w-1/2 md:w-1/4 flex items-center justify-end px-2">
+                    {
+                        user ?
+                            <BsPlusCircleFill title="Create new Room" onClick={handleShowModal} size={35} className=" text-neutral cursor-pointer" />
+                            : null
+                    }
                     {
                         user ? (
                             <Link to="/dashboard" className="text-gray-600 btn shadow-none hover:bg-transparent bg-transparent border-none ">
