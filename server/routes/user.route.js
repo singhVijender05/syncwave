@@ -114,7 +114,7 @@ router.get('/user-details', verifyToken, async (req, res) => {
         }
         res.json({
             user: {
-                name: user.name, email: user.email, profilePicture: user.profilePicture, createdAt: user.createdAt, rooms: user.rooms.length
+                name: user.name, email: user.email, profilePicture: user.profilePicture, createdAt: user.createdAt, rooms: user.rooms.length, _id: user._id
             }
         });
     } catch (error) {

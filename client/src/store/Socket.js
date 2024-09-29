@@ -28,10 +28,14 @@ const useSocketStore = create((set, get) => ({
         });
 
         socket.on('new-member', (data) => {
-            set((state) => ({
-                connectedMembers: [...state.connectedMembers, data.memberName],
-            }));
+            // console.log('New member:', data);
+            set({ connectedMembers: data.connectedUsers });
             useRoomStore.getState().getMembers(useRoomStore.getState().room._id);
+        });
+
+        socket.on('room_members_update', (data) => {
+            // console.log('Room members updated:', data);
+            set({ connectedMembers: data });
         });
 
         socket.on('message', (messageData) => {
@@ -53,10 +57,10 @@ const useSocketStore = create((set, get) => ({
         }
     },
 
-    joinRoom: (roomId) => {
+    joinRoom: (roomId, userId) => {
         const { socket } = get();
         if (socket) {
-            socket.emit('join-room', { roomId });
+            socket.emit('join-room', { roomId, userId });
         }
     },
 

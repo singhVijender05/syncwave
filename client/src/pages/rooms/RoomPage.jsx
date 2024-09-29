@@ -5,10 +5,12 @@ import { useEffect } from "react";
 import useRoomStore from "../../store/Room";
 import { useParams } from "react-router-dom";
 import Members from "./Members";
+import useAuthStore from "../../store/Auth";
 
 const RoomPage = () => {
     const { socket, createSocket, videoUrl } = useSocketStore();
     const { room, sendVideoUrl, joinRoom } = useRoomStore();
+    const { user } = useAuthStore();
     const { roomId } = useParams();
 
     useEffect(() => {
@@ -16,10 +18,10 @@ const RoomPage = () => {
     }, []);
 
     useEffect(() => {
-        if (socket) {
-            joinRoom(roomId);
+        if (socket && user) {
+            joinRoom(roomId, user._id);
         }
-    }, [socket]);
+    }, [socket, user]);
 
 
     return (

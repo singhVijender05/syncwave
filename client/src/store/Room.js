@@ -78,7 +78,7 @@ const useRoomStore = create((set, get) => ({
             showToast('An error occurred', 'error');
         }
     },
-    joinRoom: async (roomId) => {
+    joinRoom: async (roomId, userId) => {
         try {
             showToast('Joining room...', 'loading');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/join/${roomId}`, {
@@ -88,7 +88,7 @@ const useRoomStore = create((set, get) => ({
             const data = await response.json();
             showToast('', 'dismiss');
             if (response.ok) {
-                useSocketStore.getState().joinRoom(roomId);
+                useSocketStore.getState().joinRoom(roomId, userId);
                 showToast('Room joined successfully', 'success');
                 get().getRoomDetails(roomId);
                 get().getMembers(roomId);

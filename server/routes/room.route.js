@@ -3,6 +3,7 @@ import Room from "../models/room.models.js";
 import User from "../models/user.models.js";
 import Message from "../models/message.models.js";
 import { verifyToken } from "../middlewares/verify.js";
+import { connectedUsers } from "../server.js";
 
 const router = Router();
 
@@ -52,8 +53,17 @@ export default function roomRoute(io) {
             if (!room) {
                 return res.status(404).json({ error: 'Room not found' });
             }
+            // Initialize room's connected users list if not exists
+            if (!connectedUsers[id]) {
+                connectedUsers[id] = [];
+            }
+
+            // Add the user to the connected users list if not already present
+            if (!connectedUsers[id].includes(req.user._id)) {
+                connectedUsers[id].push(req.user._id);
+            }
             if (room.members.includes(req.user._id)) { // Check user ID in members
-                io.to(id).emit('new-member', { memberName: req.user._id });
+                io.to(id).emit('new-member', { memberName: req.user._id, connectedUsers: connectedUsers[id] });
                 return res.status(200).json({ message: 'You are already a member of this room' });
             }
             room.members.push(req.user._id);
@@ -62,7 +72,7 @@ export default function roomRoute(io) {
             const user = await User.findById(req.user._id);
             user.rooms.push(room._id);
             await user.save();
-            io.to(id).emit('new-member', { memberName: req.user._id });
+            io.to(id).emit('new-member', { memberName: req.user._id, connectedUsers: connectedUsers[id] });
             res.status(200).json({ message: 'You have joined the room' });
         } catch (error) {
             res.status(400).json({ error: error.message });
@@ -166,10 +176,11 @@ export default function roomRoute(io) {
             await newmessage.save();
             room.messages.push(newmessage); // Use user ID for sender
             await room.save();
+            const user = await User.findById(req.user._id);
             io.to(id).emit('message', {
                 content: message,
                 sender: req.user.name,
-                profilePicture: req.user.profilePicture,
+                profilePicture: user.profilePicture,
                 userId: req.user._id,
                 time: new Date().toLocaleTimeString()
             }); // Emit message to room

@@ -52,6 +52,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { session: fals
 });
 
 const rooms = {};
+export const connectedUsers = {};
 
 // Function to calculate the correct current timestamp
 const getCurrentTimestamp = (roomId) => {
@@ -71,9 +72,25 @@ const getCurrentTimestamp = (roomId) => {
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    socket.on('join-room', ({ roomId }) => {
-        console.log('join-room', roomId);
-        socket.join(roomId);
+    socket.on('join-room', ({ roomId, userId }) => {
+        socket.join(roomId);  // Join the room
+
+        // Add user to connected users list for the room
+        if (!connectedUsers[roomId]) {
+            connectedUsers[roomId] = [];
+        }
+
+        // Prevent duplicates
+        if (!connectedUsers[roomId].includes(userId)) {
+            connectedUsers[roomId].push(userId);
+        }
+
+        // Emit the updated list of connected users to everyone in the room
+        io.to(roomId).emit('room_members_update', connectedUsers[roomId]);
+
+        // Store the room ID and user ID in the socket object to access on disconnect
+        socket.roomId = roomId;
+        socket.userId = userId;
     });
     socket.on('request-sync', ({ roomId }) => {
         if (rooms[roomId]) {
@@ -121,7 +138,17 @@ io.on('connection', (socket) => {
         console.log(rooms);
     });
     socket.on('disconnect', () => {
-        console.log('user disconnected');
+        const { roomId, userId } = socket;
+
+        if (roomId && userId) {
+            // Remove the user from the connected users list for the room
+            connectedUsers[roomId] = connectedUsers[roomId].filter((id) => id !== userId);
+
+            // Emit the updated connected users list to the room
+            io.to(roomId).emit('room_members_update', connectedUsers[roomId]);
+
+            console.log(`User ${userId} disconnected from room ${roomId}`);
+        }
     });
 });
 

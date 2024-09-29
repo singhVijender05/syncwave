@@ -18,7 +18,7 @@ const Members = () => {
                 {
                     members.map((member, index) => (
                         <div key={index} className="tooltip" data-tip={member.name}>
-                            <div className="avatar offline">
+                            <div className={`avatar ${connectedMembers.includes(member._id) ? 'online' : 'offline'}`}>
                                 <div className="rounded-full w-10 h-10">
                                     {
                                         member.profilePicture ?
