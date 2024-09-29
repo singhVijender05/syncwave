@@ -207,6 +207,30 @@ const useRoomStore = create((set, get) => ({
             console.error(error);
             showToast('An error occurred', 'error');
         }
+    },
+    changeRoomName: async (roomId, name) => {
+        try {
+            showToast('Changing room name...', 'loading');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/update/${roomId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ newname: name }),
+                credentials: 'include'
+            });
+            const data = await response.json();
+            showToast('', 'dismiss');
+            if (response.ok) {
+                showToast('Room name changed successfully', 'success');
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
     }
 }))
 

@@ -38,6 +38,7 @@ export default function roomRoute(io) {
             }
             room.name = newname;
             await room.save();
+            io.to(id).emit('room-name-changed', { room }); // Emit new room
             res.status(200).json({ message: 'Room name updated successfully' });
         } catch (error) {
             res.status(400).json({ error: error.message });

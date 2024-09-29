@@ -44,6 +44,11 @@ const useSocketStore = create((set, get) => ({
             }));
         });
 
+        socket.on('room-name-changed', (data) => {
+            //update room name of existing room
+            useRoomStore.getState().setRoom(data.room);
+        });
+
         socket.on('room-closed', () => {
             console.log('The room was closed');
             socket.disconnect();
