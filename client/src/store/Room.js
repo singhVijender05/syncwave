@@ -41,6 +41,7 @@ const useRoomStore = create((set, get) => ({
                 credentials: 'include'
             });
             const data = await response.json();
+            console.log('Room details:', data);
             showToast('', 'dismiss');
             if (response.ok) {
                 set({ room: data.room });

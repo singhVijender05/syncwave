@@ -247,7 +247,7 @@ export default function roomRoute(io) {
             room.videoUrl = videoUrl;
             room.videoHistory.push({ videoUrl, watchedAt: Date.now() });
             await room.save();
-            io.to(id).emit('video-url', { videoUrl }); // Emit video URL to room
+            io.to(id).emit('video-url', { videoUrl, room }); // Emit video URL to room
             res.status(200).json({ message: 'Video URL set successfully' });
         } catch (error) {
             res.status(400).json({ error: error.message });

@@ -25,6 +25,7 @@ const useSocketStore = create((set, get) => ({
         socket.on('video-url', (data) => {
             console.log('Video URL received:', data.videoUrl);
             set({ videoUrl: data.videoUrl });
+            useRoomStore.getState().setRoom(data.room);
         });
 
         socket.on('new-member', (data) => {

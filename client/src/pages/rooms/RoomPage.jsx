@@ -39,6 +39,7 @@ const RoomPage = () => {
         setTitle('Change Video URL');
         setPlaceholder('Enter the new video URL');
         document.getElementById('my_modal_7').showModal();
+        document.getElementById('edit').value = '';
     }
 
 
