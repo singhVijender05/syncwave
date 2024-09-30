@@ -9,10 +9,12 @@ import useAuthStore from "../../store/Auth";
 import { MdEdit } from "react-icons/md";
 import { TbExchange } from "react-icons/tb";
 import PropTypes from 'prop-types';
+import History from "./History";
 
 const RoomPage = () => {
     const [title, setTitle] = useState('');
     const [placeholder, setPlaceholder] = useState('')
+    const [tab, setTab] = useState('chats');
     const { socket, createSocket, videoUrl } = useSocketStore();
     const { room, sendVideoUrl, joinRoom } = useRoomStore();
     const { user } = useAuthStore();
@@ -68,13 +70,17 @@ const RoomPage = () => {
                 <div className="chats w-full flex flex-col space-y-1 border-2 border-gray-500 rounded-xl md:m-4 p-1 relative shadow-black shadow-2xl">
                     {/* Tabs */}
                     <div role="tablist" className="tabs tabs-boxed border border-gray-500">
-                        <a role="tab" className="tab tab-active">Chats</a>
-                        <a role="tab" className="tab">History</a>
+                        <a onClick={() => setTab('chats')} role="tab" className={`tab ${tab === 'chats' ? 'tab-active' : ''}`}>Chats</a>
+                        <a onClick={() => setTab('history')} role="tab" className={`tab ${tab === 'history' ? 'tab-active' : ''}`}>History</a>
                     </div>
 
                     {/* Chat box should flex to fill available space */}
                     <div className="flex-1 overflow-hidden">
-                        <Chat roomId={roomId} />
+                        {
+                            tab === 'chats' ?
+                                <Chat roomId={roomId} /> :
+                                <History history={room.videoHistory} roomId={roomId} />
+                        }
                     </div>
                 </div>
             </div>

@@ -3,31 +3,9 @@ import { BsPersonCircle } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 import { MdLiveTv, MdDelete } from "react-icons/md";
 import { TbExternalLink } from "react-icons/tb";
+import { formatDate, getYouTubeThumbnail } from '../../utils/functions';
 
 const RoomCard = ({ room, deletable }) => {
-    // Function to extract video ID from YouTube URL and generate the thumbnail URL
-    const getYouTubeThumbnail = (url) => {
-        const videoIdMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-        return videoIdMatch ? `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg` : null;
-    };
-
-    function formatDate(isoDateString) {
-        const date = new Date(isoDateString);
-
-        // Define options for date formatting
-        const day = date.getDate(); // Get day of the month
-        const month = date.toLocaleString('en-US', { month: 'short' }); // Get short month name
-        const year = date.getFullYear(); // Get full year
-
-        // Format hours and minutes
-        let hours = date.getHours();
-        const minutes = date.getMinutes().toString().padStart(2, '0'); // Add leading zero to minutes if necessary
-        const ampm = hours >= 12 ? 'pm' : 'am';
-        hours = hours % 12 || 12; // Convert to 12-hour format
-
-        // Build the formatted date string
-        return `${day} ${month} ${year} | ${hours}:${minutes} ${ampm}`;
-    }
 
     return (
         <div key={room._id} className="card group card-compact bg-base-100 mr-3 mb-3 w-full md:w-96 shadow-2xl shadow-[#72563b] font-poppins overflow-hidden">

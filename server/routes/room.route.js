@@ -236,23 +236,37 @@ export default function roomRoute(io) {
     router.post('/video/:id', verifyToken, async (req, res) => {
         const { id } = req.params;
         const { videoUrl } = req.body;
+
         try {
             const room = await Room.findById(id);
             if (!room) {
                 return res.status(404).json({ error: 'Room not found' });
             }
-            if (room.creator.toString() !== req.user._id.toString()) { // Check user ID for authorization
+
+            // Check user ID for authorization
+            if (room.creator.toString() !== req.user._id.toString()) {
                 return res.status(403).json({ error: 'You are not authorized to set video URL' });
             }
+
+            // Remove any previous occurrence of the same videoUrl in videoHistory
+            room.videoHistory = room.videoHistory.filter(video => video.videoUrl !== videoUrl);
+
+            // Add new video URL to the history
             room.videoUrl = videoUrl;
             room.videoHistory.push({ videoUrl, watchedAt: Date.now() });
+
             await room.save();
-            io.to(id).emit('video-url', { videoUrl, room }); // Emit video URL to room
+
+            // Emit the new video URL to all room members
+            io.to(id).emit('video-url', { videoUrl, room });
+
             res.status(200).json({ message: 'Video URL set successfully' });
+
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
     });
+
 
     // get room details
     router.get('/:id', verifyToken, async (req, res) => {
