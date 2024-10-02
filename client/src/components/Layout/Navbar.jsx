@@ -76,7 +76,14 @@ const Navbar = () => {
                                 {
                                     navTabs.map(tab => (
                                         <li key={tab.name} className="text-lg">
-                                            <Link to={tab.link}>{tab.name}</Link>
+                                            <Link to={tab.link}>
+                                                <span className={`${location.pathname === tab.link ? 'before:bg-neutral text-white' : 'text-neutral'
+                                                    } before:block before:absolute before:-inset-1 before:-skew-y-3 relative inline-block`}>
+                                                    <span className="relative">
+                                                        {tab.name}
+                                                    </span>
+                                                </span>
+                                            </Link>
                                         </li>
                                     ))
                                 }
