@@ -12,11 +12,9 @@ html {
 
 .realistic-marker-highlight {
   position: relative;
-  color: #ffffff;
   font-family: Libre Franklin;
   /* font-size: 32px; */
   margin-left: 15px;
-  font-weight: 500;
 }
 .realistic-marker-highlight:before {
   content: "";
