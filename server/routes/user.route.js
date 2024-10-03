@@ -41,7 +41,7 @@ router.post('/login', async (req, res) => {
         const refreshToken = user.generateRefreshToken();
         res.cookie('accessToken', accessToken, { httpOnly: true });
         res.cookie('refreshToken', refreshToken, { httpOnly: true });
-        res.json({ message: 'Login successful', user: { name: user.name, email: user.email, profilePicture: user.profilePicture } });
+        res.json({ message: 'Login successful', user: { name: user.name, email: user.email, profilePicture: user.profilePicture, _id: user._id } });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

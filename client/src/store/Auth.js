@@ -5,7 +5,29 @@ const useAuthStore = create((set, get) => ({
     user: null,
     loading: true,
     setUser: (user) => set({ user }),
-    logout: () => set({ user: null }),
+    logout: async (navigate) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/logout`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (response.ok) {
+                set({ user: null });
+                showToast('Logged out successfully', 'success');
+                navigate('/');
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
+    },
     login: async (credentials, navigate, redirectPath) => {
         if (!credentials.email || !credentials.password) {
             return showToast('Please fill in all fields', 'error');

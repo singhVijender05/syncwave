@@ -1,18 +1,31 @@
 import { MdLiveTv } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { navTabs } from "../../utils/constants";
 import { BsPersonCircle, BsPlusCircleFill } from "react-icons/bs";
 import useAuthStore from "../../store/Auth";
 import { FaHamburger } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
+import { IoIosLogOut } from "react-icons/io";
 
 const Navbar = () => {
-    const { user } = useAuthStore();
+    const { user, logout } = useAuthStore();
     const location = useLocation();
+    const navigate = useNavigate();
 
     const handleShowModal = () => {
         const modal = document.getElementById('my_modal_5');
         modal.showModal();
+    }
+
+    const handleShowLogout = () => {
+        const modal = document.getElementById('my_modal_10');
+        modal.showModal();
+    }
+
+    const handleLogout = (e) => {
+        e.preventDefault();
+        logout(navigate);
+        document.getElementById('my_modal_10').close();
     }
 
     // Smooth scroll to features section
@@ -58,6 +71,11 @@ const Navbar = () => {
                     </div>
                 </div>
                 <div className="right w-1/2 md:w-1/4 flex items-center justify-end px-2">
+                    {
+                        user && (
+                            <IoIosLogOut onClick={handleShowLogout} title="Logout" size={35} className="text-neutral cursor-pointer mx-2" />
+                        )
+                    }
                     {user && (
                         <BsPlusCircleFill title="Create new Room" onClick={handleShowModal} size={35} className="text-neutral cursor-pointer" />
                     )}
@@ -105,6 +123,19 @@ const Navbar = () => {
                     </div>
                 </div>
             </nav>
+            <dialog id="my_modal_10" className="modal modal-bottom sm:modal-middle font-poppins">
+                <div className="modal-box space-y-3">
+                    <h3 className="font-bold text-2xl">Logout</h3>
+                    <p className="">Are you sure you want to logout?</p>
+                    <div className="modal-action">
+                        <form method="dialog">
+                            {/* if there is a button in form, it will close the modal */}
+                            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                            <button type="submit" onClick={handleLogout} className="btn btn-neutral mt-1">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
         </>
     );
 }
