@@ -1,19 +1,22 @@
 import { useEffect, useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import useAuthStore from '../../store/Auth'
 
 const SignIn = () => {
     const [credentials, setCredentials] = useState({ email: '', password: '' })
     const navigate = useNavigate()
+    const location = useLocation();
     const { login } = useAuthStore()
+    const queryParams = new URLSearchParams(location.search);
+    const redirectPath = queryParams.get('redirect') || '/dashboard';
 
     const handleChange = (e) => {
         setCredentials({ ...credentials, [e.target.name]: e.target.value })
     }
 
     const handleSignin = async () => {
-        await login(credentials, navigate)
+        await login(credentials, navigate, redirectPath)
     }
 
     useEffect(() => {

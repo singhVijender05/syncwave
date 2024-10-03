@@ -6,7 +6,7 @@ const useAuthStore = create((set, get) => ({
     loading: true,
     setUser: (user) => set({ user }),
     logout: () => set({ user: null }),
-    login: async (credentials, navigate) => {
+    login: async (credentials, navigate, redirectPath) => {
         if (!credentials.email || !credentials.password) {
             return showToast('Please fill in all fields', 'error');
         }
@@ -23,7 +23,7 @@ const useAuthStore = create((set, get) => ({
             if (response.ok) {
                 set({ user: data.user });
                 showToast('Logged in successfully', 'success');
-                navigate('/dashboard');
+                navigate(redirectPath);
             } else {
                 console.error(data);
                 showToast(data.message, 'error');
