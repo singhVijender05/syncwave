@@ -9,7 +9,7 @@ const Footer = () => {
                     <img className='w-full' src={footer} alt="footer" />
                 </div>
 
-                <div className="details pb-10 px-4 lg:px-0 lg:pl-24 w-full text-white bg-[#C62467]">
+                <div className="details pb-20 px-4 lg:px-0 lg:pl-24 w-full text-white bg-[#C62467]">
                     <div className="wrapper space-y-6 lg:space-y-0 flex-col lg:flex-row w-fit lg:space-x-20 lg:mx-auto flex">
 
                         <div className="vishal lg:px-24 space-y-5 lg:w-1/2">

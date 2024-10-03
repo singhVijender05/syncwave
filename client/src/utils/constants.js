@@ -8,8 +8,8 @@ export const navTabs = [
     //     link: "/rooms"
     // },
     {
-        name: "Team",
-        link: "/team"
+        name: "Features",
+        link: "#features"
     }
 ]
 

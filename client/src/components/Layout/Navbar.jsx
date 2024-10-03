@@ -15,6 +15,14 @@ const Navbar = () => {
         modal.showModal();
     }
 
+    // Smooth scroll to features section
+    const scrollToSection = (sectionId) => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
         <>
             <nav className="p-2 backdrop-blur-2xl fixed top-0 w-full z-50 flex items-center justify-between font-poppins shadow-2xl shadow-[#1e1e1c] border-b bg-[#eae3cd]">
@@ -29,14 +37,20 @@ const Navbar = () => {
                             {
                                 navTabs.map(tab => (
                                     <li key={tab.name}>
-                                        <Link to={tab.link}>
-                                            <span className={`${location.pathname === tab.link ? 'before:bg-neutral text-white' : 'text-neutral'
-                                                } before:block before:absolute before:-inset-1 before:-skew-y-3 relative inline-block`}>
-                                                <span className="relative">
-                                                    {tab.name}
-                                                </span>
+                                        {tab.link.startsWith('#') ? (
+                                            <span
+                                                onClick={() => scrollToSection(tab.link.substring(1))}
+                                                className={`${location.pathname === tab.link ? 'before:bg-neutral text-white' : 'text-neutral'} before:block before:absolute before:-inset-1 before:-skew-y-3 relative inline-block cursor-pointer`}
+                                            >
+                                                <span className="relative">{tab.name}</span>
                                             </span>
-                                        </Link>
+                                        ) : (
+                                            <Link to={tab.link}>
+                                                <span className={`${location.pathname === tab.link ? 'before:bg-neutral text-white' : 'text-neutral'} before:block before:absolute before:-inset-1 before:-skew-y-3 relative inline-block`}>
+                                                    <span className="relative">{tab.name}</span>
+                                                </span>
+                                            </Link>
+                                        )}
                                     </li>
                                 ))
                             }
@@ -44,25 +58,20 @@ const Navbar = () => {
                     </div>
                 </div>
                 <div className="right w-1/2 md:w-1/4 flex items-center justify-end px-2">
-                    {
-                        user ?
-                            <BsPlusCircleFill title="Create new Room" onClick={handleShowModal} size={35} className=" text-neutral cursor-pointer" />
-                            : null
-                    }
-                    {
-                        user ? (
-                            <Link to="/dashboard" className="text-gray-600 btn shadow-none hover:bg-transparent bg-transparent border-none ">
-                                {
-                                    user?.profilePicture ?
-                                        <img src={user?.profilePicture} alt="profile" className="rounded-full w-8 h-8 object-cover ring-base ring-offset-base-100 ring-2 ring-offset-2" />
-                                        :
-                                        <BsPersonCircle size={30} />
-                                }
-                            </Link>
-                        ) : (
-                            <Link to="/sign-in" className="btn btn-neutral mx-3">Sign In</Link>
-                        )
-                    }
+                    {user && (
+                        <BsPlusCircleFill title="Create new Room" onClick={handleShowModal} size={35} className="text-neutral cursor-pointer" />
+                    )}
+                    {user ? (
+                        <Link to="/dashboard" className="text-gray-600 btn shadow-none hover:bg-transparent bg-transparent border-none ">
+                            {user?.profilePicture ? (
+                                <img src={user?.profilePicture} alt="profile" className="rounded-full w-8 h-8 object-cover ring-base ring-offset-base-100 ring-2 ring-offset-2" />
+                            ) : (
+                                <BsPersonCircle size={30} />
+                            )}
+                        </Link>
+                    ) : (
+                        <Link to="/sign-in" className="btn btn-neutral mx-3">Sign In</Link>
+                    )}
                     <div className="drawer md:hidden w-fit">
                         <input id="my-drawer" type="checkbox" className="drawer-toggle" />
                         <div className="drawer-content">
@@ -76,14 +85,18 @@ const Navbar = () => {
                                 {
                                     navTabs.map(tab => (
                                         <li key={tab.name} className="text-lg">
-                                            <Link to={tab.link}>
-                                                <span className={`${location.pathname === tab.link ? 'before:bg-neutral text-white' : 'text-neutral'
-                                                    } before:block before:absolute before:-inset-1 before:-skew-y-3 relative inline-block`}>
-                                                    <span className="relative">
-                                                        {tab.name}
-                                                    </span>
+                                            {tab.link.startsWith('#') ? (
+                                                <span
+                                                    onClick={() => scrollToSection(tab.link.substring(1))}
+                                                    className="cursor-pointer"
+                                                >
+                                                    {tab.name}
                                                 </span>
-                                            </Link>
+                                            ) : (
+                                                <Link to={tab.link}>
+                                                    {tab.name}
+                                                </Link>
+                                            )}
                                         </li>
                                     ))
                                 }
@@ -93,7 +106,7 @@ const Navbar = () => {
                 </div>
             </nav>
         </>
-    )
+    );
 }
 
-export default Navbar
+export default Navbar;

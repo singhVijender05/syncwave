@@ -5,7 +5,7 @@ import { useInView } from "react-intersection-observer";
 
 const Features = () => {
     return (
-        <div className="font-poppins md:py-10">
+        <div id="features" className="font-poppins md:py-10">
             <div className="text-center text-5xl md:text-8xl font-extrabold md:pb-20 flex w-full items-center justify-center md:space-x-4">
                 <div className="divider md:w-1/4 divider-neutral h-20"></div>
                 <h1>How it Works</h1>
