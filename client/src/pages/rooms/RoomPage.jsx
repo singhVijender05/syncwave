@@ -10,14 +10,18 @@ import { MdEdit } from "react-icons/md";
 import { TbExchange } from "react-icons/tb";
 import PropTypes from 'prop-types';
 import History from "./History";
+import { LuCopy, LuCopyCheck } from "react-icons/lu";
+import { showToast } from "../../utils/toast";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 const RoomPage = () => {
     const [title, setTitle] = useState('');
     const [placeholder, setPlaceholder] = useState('')
+    const [isCopied, setIsCopied] = useState(false);
     const [tab, setTab] = useState('chats');
     const { socket, createSocket, videoUrl } = useSocketStore();
     const { room, sendVideoUrl, joinRoom } = useRoomStore();
-    const { user } = useAuthStore();
+    const { user, loading } = useAuthStore();
     const { roomId } = useParams();
 
     useEffect(() => {
@@ -29,6 +33,8 @@ const RoomPage = () => {
             joinRoom(roomId, user._id);
         }
     }, [socket, user]);
+
+    useRequireAuth(user, loading);
 
     const showNameChangeBox = () => {
         setTitle('Change Room Name');
@@ -44,6 +50,18 @@ const RoomPage = () => {
         document.getElementById('edit').value = '';
     }
 
+    const handleCopy = () => {
+        const currentUrl = window.location.href; // Get the current page URL
+        navigator.clipboard.writeText(currentUrl)
+            .then(() => {
+                setIsCopied(true); // Show the check icon
+                setTimeout(() => setIsCopied(false), 2000); // Revert after 2 seconds
+            })
+            .catch((err) => {
+                showToast('error', 'Failed to copy link');
+                console.error('Failed to copy link', err);
+            });
+    };
 
     return (
         <div className="w-full relative h-screen flex flex-col md:flex-row md:justify-center pt-20 md:pt-16 font-poppins md:px-10">
@@ -60,6 +78,9 @@ const RoomPage = () => {
                                 </div>
                                 <div title="Change video url" onClick={showUrlChangeBox} className='btn btn-neutral transition-all duration-300'>
                                     <TbExchange size={25} />
+                                </div>
+                                <div title="Copy room link" onClick={handleCopy} className='btn btn-neutral transition-all duration-300'>
+                                    {isCopied ? <LuCopyCheck size={25} /> : <LuCopy size={25} />}
                                 </div>
                             </div>}
                         <Members />

@@ -3,6 +3,7 @@ import { showToast } from '../utils/toast';
 
 const useAuthStore = create((set, get) => ({
     user: null,
+    loading: true,
     setUser: (user) => set({ user }),
     logout: () => set({ user: null }),
     login: async (credentials, navigate) => {
@@ -30,6 +31,8 @@ const useAuthStore = create((set, get) => ({
         } catch (error) {
             console.error(error);
             showToast('An error occurred', 'error');
+        } finally {
+            set({ loading: false });
         }
     },
     signup: async (credentials, navigate) => {
@@ -76,6 +79,8 @@ const useAuthStore = create((set, get) => ({
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            set({ loading: false });
         }
     },
     uploadProfilePicture: async (formData) => {

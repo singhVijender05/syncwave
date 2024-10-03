@@ -1,7 +1,13 @@
+import useRequireAuth from "../../hooks/useRequireAuth";
+import useAuthStore from "../../store/Auth";
 import Profile from "./Profile";
 import Rooms from "./Rooms";
 
 const DashboardPage = () => {
+
+    const { user, loading } = useAuthStore();
+    useRequireAuth(user, loading);
+
     return (
         <div className="dashboard-wrapper flex flex-col md:flex-row min-h-screen">
             {/* Profile section - sticky */}
