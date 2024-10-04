@@ -52,16 +52,25 @@ app.get('/auth/google/callback', passport.authenticate('google', { session: fals
     const accessToken = req.user.generateAccessToken();
     const refreshToken = req.user.generateRefreshToken();
 
-    // Store tokens in HTTP-only cookies to prevent exposure in JavaScript or URLs
-    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, sameSite: 'Lax' });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'Lax' });
+    // Set cookies with SameSite=None and Secure for cross-origin
+    res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        sameSite: 'None', // Allow cross-origin
+        secure: true,     // Required for SameSite=None on HTTPS
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        sameSite: 'None', // Allow cross-origin
+        secure: true,     // Required for SameSite=None on HTTPS
+    });
 
     const { state } = req.query;
     const { redirectUrl } = JSON.parse(Buffer.from(state, 'base64').toString());
     if (typeof redirectUrl === 'string' && redirectUrl.startsWith('/')) {
         return res.redirect(`${process.env.FRONTEND_URL}${redirectUrl}`);
     }
-    res.redirect('/dashboard');
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 });
 
 const rooms = {};
