@@ -24,7 +24,7 @@ const Chat = ({ roomId }) => {
     };
 
     return (
-        <div className="chat-container flex flex-col h-full relative w-full border border-gray-300 rounded-lg">
+        <div className="chat-container bg-[url('/chats/dark_bg.png')] flex flex-col h-full relative w-full border border-gray-500 rounded-lg">
             <div className="messages flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 ? (
                     <p className="text-gray-500 text-center">No messages yet</p>
@@ -43,11 +43,16 @@ const Chat = ({ roomId }) => {
                                 </div>
                             </div>
                             <div className="chat-header">
-                                {message.userId == user._id ? 'You' : message.sender}
-                                <time className="text-xs opacity-50">{message.time}</time>
                             </div>
-                            <div className="chat-bubble">{message.content}</div>
-                            <div className="chat-footer opacity-50">Delivered</div>
+                            <div className="chat-bubble flex flex-col min-w-[50%]">
+                                <div className='text-xs font-light'>
+                                    {message.userId == user._id ? 'You' : message.sender}
+                                </div>
+                                <div className='text-sm'>
+                                    {message.content}
+                                </div>
+                                <time className="text-xs opacity-50 text-right">{message.time}</time>
+                            </div>
                         </div>
                     ))
                 )}
@@ -56,18 +61,18 @@ const Chat = ({ roomId }) => {
             </div>
 
             {/* Input area */}
-            <div className="input-area flex items-center p-2 border-t border-gray-300">
+            <div className="input-area flex items-center p-2 border-t border-gray-500 backdrop-blur-2xl rounded-b-xl">
                 <input
                     id='message-input'
                     type="text"
-                    className="border border-gray-300 rounded-lg p-2 w-full"
+                    className="border border-gray-300 rounded-lg p-2 w-full min-h-12 outline-none"
                     placeholder="Type a message..."
                     onKeyPress={(e) => {
                         if (e.key === 'Enter') handleSendMessage();
                     }}
                 />
                 <button
-                    className="bg-blue-500 text-white rounded-lg px-4 py-2 ml-2"
+                    className="btn btn-neutral text-white rounded-lg ml-2"
                     onClick={handleSendMessage}
                 >
                     Send

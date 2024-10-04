@@ -8,8 +8,9 @@ import http from 'http';
 import { Server } from 'socket.io';
 import { router as userRoute } from './routes/user.route.js';
 import roomRoute from './routes/room.route.js';
+import dotenv from 'dotenv';
 const app = express();
-
+dotenv.config();
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -39,19 +40,32 @@ app.use('/api/room', roomRoute(io));
 
 
 
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { session: false }), async (req, res) => {
+app.get('/auth/google', (req, res, next) => {
+    const redirectUrl = req.query.redirect || '/dashboard';
+    const state = Buffer.from(JSON.stringify({ redirectUrl })).toString('base64');
+    const authenticator = passport.authenticate('google', { scope: ['profile', 'email'], state })
+    authenticator(req, res, next);
+});
+app.get('/auth/google/callback', passport.authenticate('google', { session: false, failureRedirect: '/sign-in' }), (req, res) => {
 
-    console.log('callback', req);
-    const googleUser = await User.findOne({ email: req.user.email });
-    const accessToken = googleUser.generateAccessToken();
-    const refreshToken = googleUser.generateRefreshToken();
-    res.cookie('accessToken', accessToken, { httpOnly: true });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true })
-    res.redirect('http://localhost:5173/oauth/callback?accessToken=' + accessToken + '&refreshToken=' + refreshToken);
+    // Generate tokens
+    const accessToken = req.user.generateAccessToken();
+    const refreshToken = req.user.generateRefreshToken();
+
+    // Store tokens in HTTP-only cookies to prevent exposure in JavaScript or URLs
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, sameSite: 'Lax' });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'Lax' });
+
+    const { state } = req.query;
+    const { redirectUrl } = JSON.parse(Buffer.from(state, 'base64').toString());
+    if (typeof redirectUrl === 'string' && redirectUrl.startsWith('/')) {
+        return res.redirect(`${process.env.FRONTEND_URL}${redirectUrl}`);
+    }
+    res.redirect('/dashboard');
 });
 
 const rooms = {};
+export const connectedUsers = {};
 
 // Function to calculate the correct current timestamp
 const getCurrentTimestamp = (roomId) => {
@@ -71,9 +85,25 @@ const getCurrentTimestamp = (roomId) => {
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    socket.on('join-room', ({ roomId }) => {
-        console.log('join-room', roomId);
-        socket.join(roomId);
+    socket.on('join-room', ({ roomId, userId }) => {
+        socket.join(roomId);  // Join the room
+
+        // Add user to connected users list for the room
+        if (!connectedUsers[roomId]) {
+            connectedUsers[roomId] = [];
+        }
+
+        // Prevent duplicates
+        if (!connectedUsers[roomId].includes(userId)) {
+            connectedUsers[roomId].push(userId);
+        }
+
+        // Emit the updated list of connected users to everyone in the room
+        io.to(roomId).emit('room_members_update', connectedUsers[roomId]);
+
+        // Store the room ID and user ID in the socket object to access on disconnect
+        socket.roomId = roomId;
+        socket.userId = userId;
     });
     socket.on('request-sync', ({ roomId }) => {
         if (rooms[roomId]) {
@@ -121,7 +151,17 @@ io.on('connection', (socket) => {
         console.log(rooms);
     });
     socket.on('disconnect', () => {
-        console.log('user disconnected');
+        const { roomId, userId } = socket;
+
+        if (roomId && userId) {
+            // Remove the user from the connected users list for the room
+            connectedUsers[roomId] = connectedUsers[roomId].filter((id) => id !== userId);
+
+            // Emit the updated connected users list to the room
+            io.to(roomId).emit('room_members_update', connectedUsers[roomId]);
+
+            console.log(`User ${userId} disconnected from room ${roomId}`);
+        }
     });
 });
 

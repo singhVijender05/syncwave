@@ -3,6 +3,7 @@ import Room from "../models/room.models.js";
 import User from "../models/user.models.js";
 import Message from "../models/message.models.js";
 import { verifyToken } from "../middlewares/verify.js";
+import { connectedUsers } from "../server.js";
 
 const router = Router();
 
@@ -37,6 +38,7 @@ export default function roomRoute(io) {
             }
             room.name = newname;
             await room.save();
+            io.to(id).emit('room-name-changed', { room }); // Emit new room
             res.status(200).json({ message: 'Room name updated successfully' });
         } catch (error) {
             res.status(400).json({ error: error.message });
@@ -52,8 +54,17 @@ export default function roomRoute(io) {
             if (!room) {
                 return res.status(404).json({ error: 'Room not found' });
             }
+            // Initialize room's connected users list if not exists
+            if (!connectedUsers[id]) {
+                connectedUsers[id] = [];
+            }
+
+            // Add the user to the connected users list if not already present
+            if (!connectedUsers[id].includes(req.user._id)) {
+                connectedUsers[id].push(req.user._id);
+            }
             if (room.members.includes(req.user._id)) { // Check user ID in members
-                io.to(id).emit('new-member', { memberName: req.user._id });
+                io.to(id).emit('new-member', { memberName: req.user._id, connectedUsers: connectedUsers[id] });
                 return res.status(200).json({ message: 'You are already a member of this room' });
             }
             room.members.push(req.user._id);
@@ -62,7 +73,7 @@ export default function roomRoute(io) {
             const user = await User.findById(req.user._id);
             user.rooms.push(room._id);
             await user.save();
-            io.to(id).emit('new-member', { memberName: req.user._id });
+            io.to(id).emit('new-member', { memberName: req.user._id, connectedUsers: connectedUsers[id] });
             res.status(200).json({ message: 'You have joined the room' });
         } catch (error) {
             res.status(400).json({ error: error.message });
@@ -114,8 +125,13 @@ export default function roomRoute(io) {
     // Get rooms of a user
     router.get('/getRooms', verifyToken, async (req, res) => {
         try {
-            const rooms = await Room.find({ members: req.user._id }); // Filter by user ID
-            res.status(200).json({ rooms });
+            // Created rooms where the user is the creator and also populate members and admin
+            const createdRooms = await Room.find({ creator: req.user._id }).populate('members', 'name _id profilePicture').populate('admins', 'name _id profilePicture');
+
+            // Joined rooms, excluding rooms where the user is the creator
+            const joinedRooms = await Room.find({ members: req.user._id, creator: { $ne: req.user._id } }).populate('members', 'name _id profilePicture').populate('admins', 'name _id profilePicture');
+
+            res.status(200).json({ createdRooms, joinedRooms });
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
@@ -161,10 +177,11 @@ export default function roomRoute(io) {
             await newmessage.save();
             room.messages.push(newmessage); // Use user ID for sender
             await room.save();
+            const user = await User.findById(req.user._id);
             io.to(id).emit('message', {
                 content: message,
                 sender: req.user.name,
-                profilePicture: req.user.profilePicture,
+                profilePicture: user.profilePicture,
                 userId: req.user._id,
                 time: new Date().toLocaleTimeString()
             }); // Emit message to room
@@ -219,23 +236,37 @@ export default function roomRoute(io) {
     router.post('/video/:id', verifyToken, async (req, res) => {
         const { id } = req.params;
         const { videoUrl } = req.body;
+
         try {
             const room = await Room.findById(id);
             if (!room) {
                 return res.status(404).json({ error: 'Room not found' });
             }
-            if (room.creator.toString() !== req.user._id.toString()) { // Check user ID for authorization
+
+            // Check user ID for authorization
+            if (room.creator.toString() !== req.user._id.toString()) {
                 return res.status(403).json({ error: 'You are not authorized to set video URL' });
             }
+
+            // Remove any previous occurrence of the same videoUrl in videoHistory
+            room.videoHistory = room.videoHistory.filter(video => video.videoUrl !== videoUrl);
+
+            // Add new video URL to the history
             room.videoUrl = videoUrl;
             room.videoHistory.push({ videoUrl, watchedAt: Date.now() });
+
             await room.save();
-            io.to(id).emit('video-url', { videoUrl }); // Emit video URL to room
+
+            // Emit the new video URL to all room members
+            io.to(id).emit('video-url', { videoUrl, room });
+
             res.status(200).json({ message: 'Video URL set successfully' });
+
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
     });
+
 
     // get room details
     router.get('/:id', verifyToken, async (req, res) => {

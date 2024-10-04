@@ -5,7 +5,7 @@ import useRoomStore from './Room';
 const useSocketStore = create((set, get) => ({
     socket: null,
     videoUrl: null,
-    members: [],
+    connectedMembers: [],
     messages: [],
 
     setSocket: (socket) => set({ socket }),
@@ -25,19 +25,29 @@ const useSocketStore = create((set, get) => ({
         socket.on('video-url', (data) => {
             console.log('Video URL received:', data.videoUrl);
             set({ videoUrl: data.videoUrl });
+            useRoomStore.getState().setRoom(data.room);
         });
 
         socket.on('new-member', (data) => {
-            set((state) => ({
-                members: [...state.members, data.memberName],
-            }));
+            // console.log('New member:', data);
+            set({ connectedMembers: data.connectedUsers });
             useRoomStore.getState().getMembers(useRoomStore.getState().room._id);
+        });
+
+        socket.on('room_members_update', (data) => {
+            // console.log('Room members updated:', data);
+            set({ connectedMembers: data });
         });
 
         socket.on('message', (messageData) => {
             set((state) => ({
                 messages: [...state.messages, messageData],
             }));
+        });
+
+        socket.on('room-name-changed', (data) => {
+            //update room name of existing room
+            useRoomStore.getState().setRoom(data.room);
         });
 
         socket.on('room-closed', () => {
@@ -53,10 +63,10 @@ const useSocketStore = create((set, get) => ({
         }
     },
 
-    joinRoom: (roomId) => {
+    joinRoom: (roomId, userId) => {
         const { socket } = get();
         if (socket) {
-            socket.emit('join-room', { roomId });
+            socket.emit('join-room', { roomId, userId });
         }
     },
 

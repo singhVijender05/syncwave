@@ -4,6 +4,7 @@ import useSocketStore from "./Socket";
 
 const useRoomStore = create((set, get) => ({
     room: null,
+    rooms: [],
     members: [],
     setRoom: (room) => set({ room }),
     createRoom: async (roomName, navigate) => {
@@ -40,6 +41,7 @@ const useRoomStore = create((set, get) => ({
                 credentials: 'include'
             });
             const data = await response.json();
+            console.log('Room details:', data);
             showToast('', 'dismiss');
             if (response.ok) {
                 set({ room: data.room });
@@ -77,7 +79,7 @@ const useRoomStore = create((set, get) => ({
             showToast('An error occurred', 'error');
         }
     },
-    joinRoom: async (roomId) => {
+    joinRoom: async (roomId, userId) => {
         try {
             showToast('Joining room...', 'loading');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/join/${roomId}`, {
@@ -87,7 +89,7 @@ const useRoomStore = create((set, get) => ({
             const data = await response.json();
             showToast('', 'dismiss');
             if (response.ok) {
-                useSocketStore.getState().joinRoom(roomId);
+                useSocketStore.getState().joinRoom(roomId, userId);
                 showToast('Room joined successfully', 'success');
                 get().getRoomDetails(roomId);
                 get().getMembers(roomId);
@@ -156,6 +158,72 @@ const useRoomStore = create((set, get) => ({
             showToast('', 'dismiss');
             if (response.ok) {
                 useSocketStore.getState().setMessages(data.messages);
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
+    },
+    getAllRooms: async () => {
+        try {
+            showToast('Fetching rooms...', 'loading');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/getRooms`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            console.log(data);
+            showToast('', 'dismiss');
+            if (response.ok) {
+                set({ rooms: data });
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
+    },
+    deleteRoomById: async (roomId) => {
+        try {
+            showToast('Deleting room...', 'loading');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/delete/${roomId}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            showToast('', 'dismiss');
+            if (response.ok) {
+                get().getAllRooms();
+                showToast('Room deleted successfully', 'success');
+            } else {
+                console.error(data);
+                showToast(data.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('An error occurred', 'error');
+        }
+    },
+    changeRoomName: async (roomId, name) => {
+        try {
+            showToast('Changing room name...', 'loading');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/update/${roomId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ newname: name }),
+                credentials: 'include'
+            });
+            const data = await response.json();
+            showToast('', 'dismiss');
+            if (response.ok) {
+                showToast('Room name changed successfully', 'success');
             } else {
                 console.error(data);
                 showToast(data.message, 'error');

@@ -9,7 +9,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        poppins: ["Poppins", "sans-serif"],
+        'poppins': ["Poppins", "sans-serif"],
+        'DancingScript': ['Dancing Script', 'cursive'],
       }
     },
   },

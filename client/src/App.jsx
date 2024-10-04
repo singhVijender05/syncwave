@@ -7,6 +7,8 @@ import { useEffect } from 'react'
 import useAuthStore from './store/Auth'
 import CreateRoom from './components/Layout/CreateRoom'
 import RoomPage from './pages/rooms/RoomPage'
+import DashboardPage from './pages/dashboard/DashboardPage'
+import HomePage from './pages/home/HomePage'
 function App() {
 
   const { getUserDetails } = useAuthStore();
@@ -20,9 +22,11 @@ function App() {
       <Toaster />
       <Navbar />
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path='/sign-up' element={<SignUpPage />} />
         <Route path='/rooms/:roomId' element={<RoomPage />} />
+        <Route path='/dashboard' element={<DashboardPage />} />
       </Routes>
       <CreateRoom />
     </div>
