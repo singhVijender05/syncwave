@@ -124,6 +124,17 @@ const useAuthStore = create((set, get) => ({
             console.error(error);
             showToast('An error occurred', 'error');
         }
+    },
+    googleAuth: () => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const redirectUrl = queryParams.get('redirect') || '/dashboard';
+        console.log(redirectUrl);
+
+        // Properly encode the redirect URL
+        const encodedRedirectUrl = encodeURIComponent(redirectUrl);
+
+        // Pass the encoded redirect URL to the backend
+        window.location.href = `${import.meta.env.VITE_API_URL}/auth/google?redirect=${encodedRedirectUrl}`;
     }
 }))
 

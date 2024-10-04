@@ -8,8 +8,9 @@ import http from 'http';
 import { Server } from 'socket.io';
 import { router as userRoute } from './routes/user.route.js';
 import roomRoute from './routes/room.route.js';
+import dotenv from 'dotenv';
 const app = express();
-
+dotenv.config();
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -39,16 +40,28 @@ app.use('/api/room', roomRoute(io));
 
 
 
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { session: false }), async (req, res) => {
+app.get('/auth/google', (req, res, next) => {
+    const redirectUrl = req.query.redirect || '/dashboard';
+    const state = Buffer.from(JSON.stringify({ redirectUrl })).toString('base64');
+    const authenticator = passport.authenticate('google', { scope: ['profile', 'email'], state })
+    authenticator(req, res, next);
+});
+app.get('/auth/google/callback', passport.authenticate('google', { session: false, failureRedirect: '/sign-in' }), (req, res) => {
 
-    console.log('callback', req);
-    const googleUser = await User.findOne({ email: req.user.email });
-    const accessToken = googleUser.generateAccessToken();
-    const refreshToken = googleUser.generateRefreshToken();
-    res.cookie('accessToken', accessToken, { httpOnly: true });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true })
-    res.redirect('http://localhost:5173/oauth/callback?accessToken=' + accessToken + '&refreshToken=' + refreshToken);
+    // Generate tokens
+    const accessToken = req.user.generateAccessToken();
+    const refreshToken = req.user.generateRefreshToken();
+
+    // Store tokens in HTTP-only cookies to prevent exposure in JavaScript or URLs
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, sameSite: 'Lax' });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'Lax' });
+
+    const { state } = req.query;
+    const { redirectUrl } = JSON.parse(Buffer.from(state, 'base64').toString());
+    if (typeof redirectUrl === 'string' && redirectUrl.startsWith('/')) {
+        return res.redirect(`${process.env.FRONTEND_URL}${redirectUrl}`);
+    }
+    res.redirect('/dashboard');
 });
 
 const rooms = {};
