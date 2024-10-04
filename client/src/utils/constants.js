@@ -10,6 +10,10 @@ export const navTabs = [
     {
         name: "Features",
         link: "#features"
+    },
+    {
+        name: "Dashboard",
+        link: "/dashboard"
     }
 ]
 

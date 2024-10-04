@@ -35,14 +35,11 @@ const useRoomStore = create((set, get) => ({
     },
     getRoomDetails: async (roomId) => {
         try {
-            showToast('Fetching room details...', 'loading');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/${roomId}`, {
                 method: 'GET',
                 credentials: 'include'
             });
             const data = await response.json();
-            console.log('Room details:', data);
-            showToast('', 'dismiss');
             if (response.ok) {
                 set({ room: data.room });
                 useSocketStore.getState().setVideoUrl(data.room.videoUrl);
@@ -105,13 +102,11 @@ const useRoomStore = create((set, get) => ({
     },
     getMembers: async (roomId) => {
         try {
-            showToast('Fetching members...', 'loading');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/members/${roomId}`, {
                 method: 'GET',
                 credentials: 'include'
             });
             const data = await response.json();
-            showToast('', 'dismiss');
             if (response.ok) {
                 set({ members: data.members });
             } else {
@@ -125,7 +120,6 @@ const useRoomStore = create((set, get) => ({
     },
     sendMessage: async (roomId, message) => {
         try {
-            showToast('Sending message...', 'loading');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/sendmessage/${roomId}`, {
                 method: 'POST',
                 headers: {
@@ -135,9 +129,8 @@ const useRoomStore = create((set, get) => ({
                 credentials: 'include'
             });
             const data = await response.json();
-            showToast('', 'dismiss');
             if (response.ok) {
-                showToast('Message sent', 'success');
+                //
             } else {
                 console.error(data);
                 showToast(data.message, 'error');
@@ -149,13 +142,11 @@ const useRoomStore = create((set, get) => ({
     },
     getAllMessages: async (roomId) => {
         try {
-            showToast('Fetching messages...', 'loading');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/getmessages/${roomId}`, {
                 method: 'GET',
                 credentials: 'include'
             });
             const data = await response.json();
-            showToast('', 'dismiss');
             if (response.ok) {
                 useSocketStore.getState().setMessages(data.messages);
             } else {
@@ -169,14 +160,11 @@ const useRoomStore = create((set, get) => ({
     },
     getAllRooms: async () => {
         try {
-            showToast('Fetching rooms...', 'loading');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/room/getRooms`, {
                 method: 'GET',
                 credentials: 'include'
             });
             const data = await response.json();
-            console.log(data);
-            showToast('', 'dismiss');
             if (response.ok) {
                 set({ rooms: data });
             } else {
