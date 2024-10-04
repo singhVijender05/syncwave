@@ -68,12 +68,23 @@ router.post('/login', async (req, res) => {
     }
 });
 
-//logout
 router.get('/logout', verifyToken, (req, res) => {
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    // Clear the cookies with the same attributes used while setting them
+    res.clearCookie('accessToken', {
+        httpOnly: true,
+        sameSite: 'None', // Same as when you set the cookie
+        secure: true,     // Same as when you set the cookie
+    });
+
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        sameSite: 'None', // Same as when you set the cookie
+        secure: true,     // Same as when you set the cookie
+    });
+
     res.json({ message: 'Logout successful' });
 });
+
 
 //update name of user
 router.put('/update', verifyToken, async (req, res) => {
