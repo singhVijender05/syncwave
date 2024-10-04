@@ -37,11 +37,32 @@ router.post('/login', async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
+
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
-        res.cookie('accessToken', accessToken, { httpOnly: true });
-        res.cookie('refreshToken', refreshToken, { httpOnly: true });
-        res.json({ message: 'Login successful', user: { name: user.name, email: user.email, profilePicture: user.profilePicture, _id: user._id } });
+
+        // Set cookies with SameSite=None and Secure for cross-origin
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            sameSite: 'None', // Allow cross-origin
+            secure: true,     // Required for SameSite=None on HTTPS
+        });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite: 'None', // Allow cross-origin
+            secure: true,     // Required for SameSite=None on HTTPS
+        });
+
+        res.json({
+            message: 'Login successful',
+            user: {
+                name: user.name,
+                email: user.email,
+                profilePicture: user.profilePicture,
+                _id: user._id,
+            },
+        });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
