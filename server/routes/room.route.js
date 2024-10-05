@@ -64,7 +64,7 @@ export default function roomRoute(io) {
                 connectedUsers[id].push(req.user._id);
             }
             if (room.members.includes(req.user._id)) { // Check user ID in members
-                io.to(id).emit('new-member', { memberName: req.user._id, connectedUsers: connectedUsers[id] });
+                io.to(id).emit('new-member', { memberName: req.user.name, connectedUsers: connectedUsers[id] });
                 return res.status(200).json({ message: 'You are already a member of this room' });
             }
             room.members.push(req.user._id);
@@ -73,7 +73,7 @@ export default function roomRoute(io) {
             const user = await User.findById(req.user._id);
             user.rooms.push(room._id);
             await user.save();
-            io.to(id).emit('new-member', { memberName: req.user._id, connectedUsers: connectedUsers[id] });
+            io.to(id).emit('new-member', { memberName: req.user.name, connectedUsers: connectedUsers[id] });
             res.status(200).json({ message: 'You have joined the room' });
         } catch (error) {
             res.status(400).json({ error: error.message });
@@ -148,6 +148,7 @@ export default function roomRoute(io) {
             if (room.creator.toString() !== req.user._id.toString()) { // Check user ID for authorization
                 return res.status(403).json({ error: 'You are not authorized to delete this room' });
             }
+            await Message.deleteMany({ roomId: id }); // Delete all messages in the room
             await Room.findByIdAndDelete(id); // Use findByIdAndDelete to delete the room
             //remove room id from user
             const user = await User.findById(req.user._id);
@@ -173,7 +174,7 @@ export default function roomRoute(io) {
                 return res.status(400).json({ error: 'You are not a member of this room' });
             }
             //create new message
-            const newmessage = await Message.create({ content: message, sender: req.user._id });
+            const newmessage = await Message.create({ roomId: id, content: message, sender: req.user._id });
             await newmessage.save();
             room.messages.push(newmessage); // Use user ID for sender
             await room.save();

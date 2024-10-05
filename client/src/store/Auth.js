@@ -128,7 +128,6 @@ const useAuthStore = create((set, get) => ({
     googleAuth: () => {
         const queryParams = new URLSearchParams(window.location.search);
         const redirectUrl = queryParams.get('redirect') || '/dashboard';
-        console.log(redirectUrl);
 
         // Properly encode the redirect URL
         const encodedRedirectUrl = encodeURIComponent(redirectUrl);

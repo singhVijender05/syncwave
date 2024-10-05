@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import footer from '../../../public/footer.svg'
+import footer from '/footer.svg'
 
 const Footer = () => {
     return (

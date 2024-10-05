@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { io } from 'socket.io-client';
 import useRoomStore from './Room';
+import { showToast } from '../utils/toast';
 
 const useSocketStore = create((set, get) => ({
     socket: null,
@@ -30,6 +31,7 @@ const useSocketStore = create((set, get) => ({
         socket.on('new-member', (data) => {
             // console.log('New member:', data);
             set({ connectedMembers: data.connectedUsers });
+            showToast(`${data.memberName} joined the room`, 'info');
             useRoomStore.getState().getMembers(useRoomStore.getState().room._id);
         });
 

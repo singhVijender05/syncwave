@@ -79,6 +79,9 @@ export const showToast = (message, type = 'success') => {
         case 'info':
             toast(message, retroStyles.info);
             break;
+        case 'dismiss':
+            toast.dismiss();
+            break;
         default:
             toast(message, retroStyles.default);
             break;

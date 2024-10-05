@@ -26,7 +26,7 @@ const useRoomStore = create((set, get) => ({
                 navigate(`/rooms/${data.room._id}`);
             } else {
                 console.error(data);
-                showToast(data.message, 'error');
+                showToast(data.error, 'error');
             }
         } catch (error) {
             console.error(error);
@@ -93,7 +93,7 @@ const useRoomStore = create((set, get) => ({
                 get().getAllMessages(roomId);
             } else {
                 console.error(data);
-                showToast(data.message, 'error');
+                showToast(data.error, 'error');
             }
         } catch (error) {
             console.error(error);

@@ -80,10 +80,10 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
             // Listen to video state sync response
             socket.on('sync-video-state', (data) => {
                 console.log('Syncing video state for new member:', data);
-                if (data.playing != null) {
+                if (url && data.playing != null) {
                     setPlaying(data.playing); // Set the playing state
                 }
-                if (data.timestamp != null) {
+                if (url && data.timestamp != null) {
                     console.log('useSeeking to:', data.timestamp);
                     console.log('playerRef:', playerRef);
                     setCurrentTime(data.timestamp); // Set the current time

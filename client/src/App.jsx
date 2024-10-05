@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import SignInPage from './pages/sign-in/SignInPage'
 import SignUpPage from './pages/sign-up/SignUpPage'
 import { Toaster } from 'react-hot-toast'
@@ -9,13 +9,22 @@ import CreateRoom from './components/Layout/CreateRoom'
 import RoomPage from './pages/rooms/RoomPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import HomePage from './pages/home/HomePage'
+import useSocketStore from './store/Socket'
 function App() {
 
   const { getUserDetails } = useAuthStore();
+  const { socket } = useSocketStore();
+  const location = useLocation();
 
   useEffect(() => {
     getUserDetails();
   }, [getUserDetails])
+
+  useEffect(() => {
+    if (socket && !location.pathname.includes('rooms')) {
+      socket.disconnect();
+    }
+  }, [socket, location])
 
   return (
     <div className="">

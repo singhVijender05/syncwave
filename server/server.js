@@ -161,6 +161,7 @@ io.on('connection', (socket) => {
     });
     socket.on('disconnect', () => {
         const { roomId, userId } = socket;
+        console.log(`User ${userId} disconnected from room ${roomId}`);
 
         if (roomId && userId) {
             // Remove the user from the connected users list for the room
