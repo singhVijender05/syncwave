@@ -69,7 +69,7 @@ const useRoomStore = create((set, get) => ({
                 showToast(data.message, 'success');
             } else {
                 console.error(data);
-                showToast(data.message, 'error');
+                showToast(data.error, 'error');
             }
         } catch (error) {
             console.error(error);

@@ -3,6 +3,7 @@ import useRoomStore from "../../store/Room"
 import RoomCard from "./RoomCard";
 import { FaCircleExclamation } from "react-icons/fa6";
 import PropTypes from 'prop-types';
+import RoomCardSkeleton from "../../skeletons/RoomCardSkeleton";
 
 const Rooms = () => {
     const { rooms, getAllRooms } = useRoomStore();
@@ -35,31 +36,33 @@ const Rooms = () => {
                 <h1 className="text-[2.75rem] md:text-5xl font-bold mb-6">Created Rooms</h1>
                 <div id="room-cards" onClick={handleDelete} className="room-cards flex flex-wrap flex-col md:flex-row mb-10">
                     {
-                        rooms.createdRooms &&
-                            rooms.createdRooms.length ? rooms.createdRooms.map(room => (
+                        rooms.createdRooms ?
+                            (rooms.createdRooms.length ? rooms.createdRooms.map(room => (
                                 <RoomCard key={room._id} room={room} deletable={true} />
                             )) :
-                            <p className="flex items-center justify-center space-x-2">
-                                <FaCircleExclamation className="text-3xl text-red-500" />
-                                <span className="w-full text-left">
-                                    No rooms created
-                                </span>
-                            </p>
+                                <p className="flex items-center justify-center space-x-2">
+                                    <FaCircleExclamation className="text-3xl text-red-500" />
+                                    <span className="w-full text-left">
+                                        No rooms created
+                                    </span>
+                                </p>) :
+                            <RoomCardSkeleton />
                     }
                 </div>
                 <h1 className="text-5xl font-bold mb-6">Joined Rooms</h1>
                 <div className="room-cards flex flex-wrap flex-col md:flex-row">
                     {
-                        rooms.joinedRooms &&
-                            rooms.joinedRooms.length ? rooms.joinedRooms.map(room => (
+                        rooms.joinedRooms ?
+                            (rooms.joinedRooms.length ? rooms.joinedRooms.map(room => (
                                 <RoomCard key={room._id} room={room} deletable={false} />
                             )) :
-                            <p className="flex items-center justify-center space-x-2">
-                                <FaCircleExclamation className="text-3xl text-red-500" />
-                                <span className="w-full text-left">
-                                    No rooms joined
-                                </span>
-                            </p>
+                                <p className="flex items-center justify-center space-x-2">
+                                    <FaCircleExclamation className="text-3xl text-red-500" />
+                                    <span className="w-full text-left">
+                                        No rooms joined
+                                    </span>
+                                </p>) :
+                            <RoomCardSkeleton />
                     }
                 </div>
             </div>
