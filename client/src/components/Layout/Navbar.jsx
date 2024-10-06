@@ -6,11 +6,13 @@ import useAuthStore from "../../store/Auth";
 import { FaHamburger } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
+import { useEffect, useState } from "react";
 
 const Navbar = () => {
     const { user, logout } = useAuthStore();
     const location = useLocation();
     const navigate = useNavigate();
+    const [scrollToFeatures, setScrollToFeatures] = useState(false);
 
     const handleShowModal = () => {
         const modal = document.getElementById('my_modal_5');
@@ -36,6 +38,14 @@ const Navbar = () => {
         }
     };
 
+    // This effect will check the location and scroll if necessary
+    useEffect(() => {
+        if (location.pathname === '/' && scrollToFeatures) {
+            scrollToSection('features');
+            setScrollToFeatures(false); // Reset after scrolling
+        }
+    }, [location.pathname, scrollToFeatures]);
+
     return (
         <>
             <nav className="p-2 backdrop-blur-2xl fixed top-0 w-full z-50 flex items-center justify-between font-poppins shadow-2xl shadow-[#1e1e1c] border-b bg-[#eae3cd]">
@@ -52,7 +62,14 @@ const Navbar = () => {
                                     <li key={tab.name}>
                                         {tab.link.startsWith('#') ? (
                                             <span
-                                                onClick={() => scrollToSection(tab.link.substring(1))}
+                                                onClick={() => {
+                                                    if (location.pathname !== '/') {
+                                                        setScrollToFeatures(true); // Set flag to scroll after navigation
+                                                        navigate('/');
+                                                    } else {
+                                                        scrollToSection(tab.link.substring(1)); // If already on '/', scroll immediately
+                                                    }
+                                                }}
                                                 className={`${location.pathname === tab.link ? 'before:bg-neutral text-white' : 'text-neutral'} before:block before:absolute before:-inset-1 before:-skew-y-3 relative inline-block cursor-pointer`}
                                             >
                                                 <span className="relative">{tab.name}</span>
@@ -105,7 +122,15 @@ const Navbar = () => {
                                         <li key={tab.name} className="text-lg">
                                             {tab.link.startsWith('#') ? (
                                                 <span
-                                                    onClick={() => scrollToSection(tab.link.substring(1))}
+                                                    onClick={() => {
+                                                        if (location.pathname !== '/') {
+                                                            setScrollToFeatures(true); // Set flag to scroll after navigation
+                                                            navigate('/');
+                                                        } else {
+                                                            scrollToSection(tab.link.substring(1)); // If already on '/', scroll immediately
+                                                        }
+                                                    }}
+
                                                     className="cursor-pointer"
                                                 >
                                                     {tab.name}

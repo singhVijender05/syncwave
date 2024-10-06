@@ -10,21 +10,36 @@ import RoomPage from './pages/rooms/RoomPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import HomePage from './pages/home/HomePage'
 import useSocketStore from './store/Socket'
-function App() {
 
+function App() {
   const { getUserDetails } = useAuthStore();
   const { socket } = useSocketStore();
   const location = useLocation();
 
+  // Map of routes and their corresponding page titles
+  const pageTitles = {
+    '/': 'Home - SyncWave',
+    '/sign-in': 'Sign In - SyncWave',
+    '/sign-up': 'Sign Up - SyncWave',
+    '/rooms': 'Room - SyncWave',
+    '/dashboard': 'Dashboard - SyncWave',
+  };
+
   useEffect(() => {
     getUserDetails();
-  }, [getUserDetails])
+  }, [getUserDetails]);
 
   useEffect(() => {
     if (socket && !location.pathname.includes('rooms')) {
       socket.disconnect();
     }
-  }, [socket, location])
+  }, [socket, location]);
+
+  useEffect(() => {
+    // Dynamically set the page title based on the current path
+    const path = location.pathname.split('/')[1];
+    document.title = pageTitles[`/${path}`] || 'SyncWave';
+  }, [location]);
 
   return (
     <div className="">
@@ -39,7 +54,7 @@ function App() {
       </Routes>
       <CreateRoom />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

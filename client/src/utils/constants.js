@@ -3,10 +3,6 @@ export const navTabs = [
         name: "Home",
         link: "/"
     },
-    // {
-    //     name: "Rooms",
-    //     link: "/rooms"
-    // },
     {
         name: "Features",
         link: "#features"
