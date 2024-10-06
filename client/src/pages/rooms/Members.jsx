@@ -1,16 +1,11 @@
 import { BsPersonCircle } from "react-icons/bs";
 import useRoomStore from "../../store/Room";
 import useSocketStore from "../../store/Socket";
-import { useEffect } from "react";
 
 const Members = () => {
 
     const { members } = useRoomStore();
     const { connectedMembers } = useSocketStore();
-
-    useEffect(() => {
-        console.log('Connected members:', connectedMembers);
-    }, [connectedMembers]);
 
     return (
         <>

@@ -3,7 +3,7 @@ import Room from "../models/room.models.js";
 import User from "../models/user.models.js";
 import Message from "../models/message.models.js";
 import { verifyToken } from "../middlewares/verify.js";
-import { connectedUsers } from "../server.js";
+import { activeRooms, connectedUsers } from "../server.js";
 
 const router = Router();
 
@@ -248,6 +248,8 @@ export default function roomRoute(io) {
             if (room.creator.toString() !== req.user._id.toString()) {
                 return res.status(403).json({ error: 'You are not authorized to set video URL' });
             }
+
+            activeRooms[id] = { playing: false, timestamp: 0, lastUpdateTime: Date.now() }; // Initialize the room in ActiveRooms
 
             // Remove any previous occurrence of the same videoUrl in videoHistory
             room.videoHistory = room.videoHistory.filter(video => video.videoUrl !== videoUrl);

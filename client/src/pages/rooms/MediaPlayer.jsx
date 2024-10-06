@@ -35,7 +35,6 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
     };
 
     const handleSeek = (newTime) => {
-        console.log('Seeking to:', newTime);
         setCurrentTime(newTime);
         socket.emit('video-seek', { timestamp: newTime, roomId });
     };
@@ -44,7 +43,6 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
         const { playedSeconds } = progress;
 
         if (Math.abs(playedSeconds - lastKnownTime) > SEEK_THRESHOLD) {
-            console.log('Seek detected to:', playedSeconds);
             handleSeek(playedSeconds);
         }
 
@@ -73,26 +71,6 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
         };
     }, [socket, roomId, playing, currentTime]);
 
-    useEffect(() => {
-        if (socket && roomId) {
-            socket.emit('request-sync', { roomId }); // Request video state sync on load
-
-            // Listen to video state sync response
-            socket.on('sync-video-state', (data) => {
-                console.log('Syncing video state for new member:', data);
-                if (url && data.playing != null) {
-                    setPlaying(data.playing); // Set the playing state
-                }
-                if (url && data.timestamp != null) {
-                    console.log('useSeeking to:', data.timestamp);
-                    console.log('playerRef:', playerRef);
-                    setCurrentTime(data.timestamp); // Set the current time
-                    playerRef.current.seekTo(data.timestamp); // Sync to the correct timestamp
-                }
-            });
-        }
-    }, [playerRef]);
-
     return (
         <div className="relative" style={{ paddingTop: '56.25%' }}> {/* 16:9 Aspect Ratio */}
             {url ? (
@@ -113,6 +91,29 @@ const MediaPlayer = ({ url, roomId, sendVideoUrl }) => {
                         setCurrentTime(0);
                         setLastKnownTime(0);
                         handlePlayPause(false);
+                        if (socket) {
+                            socket.emit('video-ended', { roomId });
+                        }
+                    }}
+                    onReady={() => {
+                        if (socket && roomId) {
+                            console.log('Requesting video state sync for new member:', roomId);
+                            socket.emit('request-sync', { roomId }); // Request video state sync on load
+
+                            // Listen to video state sync response
+                            socket.on('sync-video-state', (data) => {
+                                console.log('Syncing video state for new member:', data);
+                                if (url && data.playing != null) {
+                                    setPlaying(data.playing); // Set the playing state
+                                }
+                                if (url && data.timestamp != null) {
+                                    console.log('useSeeking to:', data.timestamp);
+                                    console.log('playerRef:', playerRef);
+                                    setCurrentTime(data.timestamp); // Set the current time
+                                    playerRef.current.seekTo(data.timestamp); // Sync to the correct timestamp
+                                }
+                            });
+                        }
                     }}
                 />
             ) : (

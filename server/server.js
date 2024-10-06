@@ -73,12 +73,12 @@ app.get('/auth/google/callback', passport.authenticate('google', { session: fals
     res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 });
 
-const rooms = {};
+export const activeRooms = {};
 export const connectedUsers = {};
 
 // Function to calculate the correct current timestamp
 const getCurrentTimestamp = (roomId) => {
-    const room = rooms[roomId];
+    const room = activeRooms[roomId];
     if (!room) return 0;
 
     const { timestamp, playing, lastUpdateTime } = room;
@@ -115,12 +115,12 @@ io.on('connection', (socket) => {
         socket.userId = userId;
     });
     socket.on('request-sync', ({ roomId }) => {
-        if (rooms[roomId]) {
+        if (activeRooms[roomId]) {
             const currentTimestamp = getCurrentTimestamp(roomId);
-            const { playing } = rooms[roomId];
+            const { playing } = activeRooms[roomId];
             socket.emit('sync-video-state', { timestamp: currentTimestamp, playing });
         } else {
-            rooms[roomId] = { playing: false, timestamp: 0, lastUpdateTime: Date.now() };
+            activeRooms[roomId] = { playing: false, timestamp: 0, lastUpdateTime: Date.now() };
         }
     });
     socket.on('leave-room', (data) => {
@@ -133,9 +133,9 @@ io.on('connection', (socket) => {
     });
     // Listen to video state changes (play/pause)
     socket.on('video-state-change', ({ roomId, playing, timestamp }) => {
-        if (!rooms[roomId]) rooms[roomId] = {};
+        if (!activeRooms[roomId]) activeRooms[roomId] = {};
 
-        const room = rooms[roomId];
+        const room = activeRooms[roomId];
         room.playing = playing;
         room.timestamp = timestamp;
 
@@ -144,20 +144,32 @@ io.on('connection', (socket) => {
 
         // Broadcast the play/pause state change to everyone in the room
         socket.to(roomId).emit('video-state-update', { playing });
-        console.log(rooms);
+        console.log(activeRooms);
     });
 
     // Listen to video seek
     socket.on('video-seek', ({ roomId, timestamp }) => {
-        if (!rooms[roomId]) rooms[roomId] = {};
+        if (!activeRooms[roomId]) activeRooms[roomId] = {};
 
-        const room = rooms[roomId];
+        const room = activeRooms[roomId];
         room.timestamp = timestamp;
         room.lastUpdateTime = Date.now(); // Record the time when seek occurred
 
         // Broadcast the new timestamp to everyone in the room
         socket.to(roomId).emit('video-state-update', { timestamp });
-        console.log(rooms);
+        console.log(activeRooms);
+    });
+    socket.on('video-ended', ({ roomId }) => {
+        if (!activeRooms[roomId]) activeRooms[roomId] = {};
+
+        const room = activeRooms[roomId];
+        room.playing = false;
+        room.timestamp = 0;
+        room.lastUpdateTime = Date.now(); // Record the time when video ended
+
+        // Broadcast the video ended event to everyone in the room
+        socket.to(roomId).emit('video-state-update', { playing: false, timestamp: 0 });
+        console.log(activeRooms);
     });
     socket.on('disconnect', () => {
         const { roomId, userId } = socket;
