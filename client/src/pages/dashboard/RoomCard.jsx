@@ -46,7 +46,7 @@ const RoomCard = ({ room, deletable }) => {
 
                                 return (
                                     <>
-                                        <div key={video._id} id={`slide${index}`} className="carousel-item relative w-full flex flex-col space-y-2">
+                                        <div key={video._id} id={`slide${index}${room._id}`} className="carousel-item relative w-full flex flex-col space-y-2">
                                             <Link to={video.videoUrl} className='w-full h-full flex items-center justify-center' target='_blank'>
                                                 {thumbnailUrl ?
                                                     <img
@@ -60,8 +60,8 @@ const RoomCard = ({ room, deletable }) => {
                                                 }
                                             </Link>
                                             <div className="absolute left-5 right-5 top-[45%] flex -translate-y-1/2 transform justify-between">
-                                                <a href={`#slide${previousSlide}`} className="btn btn-neutral btn-circle">❮</a>
-                                                <a href={`#slide${nextSlide}`} className="btn btn-neutral btn-circle">❯</a>
+                                                <a href={`#slide${previousSlide}${room._id}`} className="btn btn-neutral btn-circle">❮</a>
+                                                <a href={`#slide${nextSlide}${room._id}`} className="btn btn-neutral btn-circle">❯</a>
                                             </div>
                                             <div>
                                                 Video watched at: <strong>{formatDate(video.watchedAt)}</strong>

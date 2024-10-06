@@ -80,10 +80,10 @@ const RoomPage = () => {
                                 <div title="Change video url" onClick={showUrlChangeBox} className='btn btn-neutral transition-all duration-300'>
                                     <TbExchange size={25} />
                                 </div>
-                                <div title="Copy room link" onClick={handleCopy} className='btn btn-neutral transition-all duration-300'>
-                                    {isCopied ? <LuCopyCheck size={25} /> : <LuCopy size={25} />}
-                                </div>
                             </div>}
+                        <div title="Copy room link" onClick={handleCopy} className='btn btn-neutral transition-all duration-300'>
+                            {isCopied ? <LuCopyCheck size={25} /> : <LuCopy size={25} />}
+                        </div>
                         <Members />
                     </div>
                 </div> :
