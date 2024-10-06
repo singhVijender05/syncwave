@@ -43,10 +43,10 @@ app.use('/api/room', roomRoute(io));
 app.get('/auth/google', (req, res, next) => {
     const redirectUrl = req.query.redirect || '/dashboard';
     const state = Buffer.from(JSON.stringify({ redirectUrl })).toString('base64');
-    const authenticator = passport.authenticate('google', { scope: ['profile', 'email'], state })
+    const authenticator = passport.authenticate('google', { scope: ['profile', 'email'], state, failureRedirect: `${process.env.FRONTEND_URL}/sign-in` })
     authenticator(req, res, next);
 });
-app.get('/auth/google/callback', passport.authenticate('google', { session: false, failureRedirect: '/sign-in' }), (req, res) => {
+app.get('/auth/google/callback', passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL}/sign-in` }), (req, res) => {
 
     // Generate tokens
     const accessToken = req.user.generateAccessToken();
