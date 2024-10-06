@@ -57,7 +57,7 @@ const useAuthStore = create((set, get) => ({
             set({ loading: false });
         }
     },
-    signup: async (credentials, navigate) => {
+    signup: async (credentials, navigate, redirectPath) => {
         if (!credentials.email || !credentials.password || !credentials.name) {
             return showToast('Please fill in all fields', 'error');
         }
@@ -73,7 +73,7 @@ const useAuthStore = create((set, get) => ({
             const data = await response.json();
             if (response.ok) {
                 showToast('Account created successfully', 'success');
-                navigate('/sign-in');
+                navigate(`/sign-in?redirect=${redirectPath}`);
             } else {
                 console.error(data);
                 showToast(data.message, 'error');
@@ -93,7 +93,6 @@ const useAuthStore = create((set, get) => ({
                 credentials: 'include'
             });
             const data = await response.json();
-            console.log(data);
             if (response.ok) {
                 set({ user: data.user });
             } else {

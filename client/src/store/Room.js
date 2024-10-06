@@ -173,7 +173,7 @@ const useRoomStore = create((set, get) => ({
             }
         } catch (error) {
             console.error(error);
-            showToast('An error occurred', 'error');
+            showToast('Please login first', 'error');
         }
     },
     deleteRoomById: async (roomId) => {

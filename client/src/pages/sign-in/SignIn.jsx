@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import useAuthStore from '../../store/Auth'
 
 const SignIn = () => {
@@ -17,6 +17,10 @@ const SignIn = () => {
 
     const handleSignin = async () => {
         await login(credentials, navigate, redirectPath)
+    }
+
+    const signupWithRedirectUrl = () => {
+        navigate(`/sign-up?redirect=${redirectPath}`)
     }
 
     useEffect(() => {
@@ -66,11 +70,10 @@ const SignIn = () => {
                 <button onClick={handleSignin} className='btn btn-active btn-neutral bg-black text-white w-full lg:w-1/2 rounded-xl'>
                     <span>Log in</span>
                 </button>
-                <div className="alreadyText">
-                    No account? <span className='font-bold'>
-                        <Link to='/sign-up'>
-                            Create an account
-                        </Link>
+                <div className="alreadyText flex space-x-1">
+                    <span>No account?</span>
+                    <span className='font-bold cursor-pointer hover:underline' onClick={signupWithRedirectUrl}>
+                        Create an account
                     </span>
                 </div>
             </div>

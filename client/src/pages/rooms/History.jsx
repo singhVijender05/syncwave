@@ -20,7 +20,7 @@ const History = ({ history, roomId }) => {
     return (
         <div onClick={handleHistoryClick} className='flex flex-col space-y-2 overflow-y-scroll h-full px-4 py-4'>
             {
-                history.length === 0 ? (
+                history == null || history.length === 0 ? (
                     <p className="text-gray-500 text-center">No history yet</p>
                 ) :
                     history.toReversed().map((video, index) => {

@@ -103,7 +103,7 @@ const RoomPage = () => {
                         {
                             tab === 'chats' ?
                                 <Chat roomId={roomId} /> :
-                                <History history={room.videoHistory} roomId={roomId} />
+                                <History history={room?.videoHistory} roomId={roomId} />
                         }
                     </div>
                 </div>
